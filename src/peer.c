@@ -218,7 +218,7 @@ static void updateRequestsMapQuery(TMapQuery *map, int hops){
 static void showMapQuery(TMapQuery *map){
 	if (map){
 		TDataMapQuery *data = map->data;
-		printf("%u %d %d %d %d\n", data->idPeer, data->requests, data->hopRequests, data->hits, data->hopHits);
+		printf("%u\t%d\t%d\t%d\t%d\n", data->idPeer, data->requests, data->hopRequests, data->hits, data->hopHits);
 	}
 }
 
@@ -582,7 +582,7 @@ static void showMapQueryPeer(TPeer* peer){
 	it->reset(it);
 	while(it->has(it)){
 		TMapQuery *map = it->current(it);
-		printf("%d ",data->id);showMapQuery(map);
+		printf("p:\t%d\t",data->id);showMapQuery(map);
 		it->next(it);
 	}
 
