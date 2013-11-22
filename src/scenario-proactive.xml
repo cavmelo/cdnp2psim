@@ -1,48 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<community tiers="2" size="10000">
-	<tier size="1000">
+<community tiers="2" size="1000">
+	<tier size="200">
 		<search>
-			<policyx>
-				<parameter name="dynamic">SEARCH:RANDOMWALK</parameter>
-				<parameter name="maxTries">30</parameter>
-			</policyx>	
 			<policy>
 				<parameter name="dynamic">SEARCH:FLOADING</parameter>
-				<parameter name="maxLevels">3</parameter>
+				<parameter name="maxLevels">4</parameter>
 			</policy>	
 		</search>
 		<peer>
 			<cache>
-				<parameter name="size">7200</parameter>
+				<parameter name="size">10800</parameter>
 				<policy>
 					<parameter name="dynamic">OMP:GDSA</parameter>
 				</policy>
 			</cache>
 			<profile>
 				<parameter name="dynamic">PROFILE:JACCARD</parameter>
-				<parameterx name="dynamic">PROFILE:ANDERBERG</parameterx>
+				<parameter name="alpha">0.5</parameter>
 			</profile>
-			<topology>
+			<topology>	
 				<parameter name="maxConnections">30</parameter>
 				<parameter name="maxAttempts">10</parameter>
 				<manager>
 					<parameter name="dynamic">TOPOLOGY:PROACTIVE</parameter>
-					<parameterX name="dynamic">TOPOLOGY:RANDOM</parameterX>
 				</manager>
 			</topology>		
 			<churn>
 				<join>
-					<parameter name="dynamic">SESSIONLASTING:PLAYLIST</parameter>
-					<pickX>
-						<parameter name="dynamic">RANDOM:EXPONENTIALSINGLETON</parameter>
-    	                <parameter name="value">3600</parameter>
-    	            </pickX>    
+					<parameter name="dynamic">SESSIONLASTING:PLAYLIST</parameter> 
+					<pick>
+						<parameter name="dynamic">RANDOM:TRUNCATEDGEOMETRICSINGLETON</parameter>
+						<parameter name="alpha">0.2</parameter>
+					</pick>	 
 				</join>
 				<leave>
 					<parameter name="dynamic">SESSIONLASTING:RANDOM</parameter>
 					<pick>
 						<parameter name="dynamic">RANDOM:EXPONENTIALSINGLETON</parameter>
-						<parameter name="mean">21600</parameter>
+						<parameter name="mean">43200</parameter>
 					</pick>	
 				</leave>
 			</churn>
@@ -55,27 +50,23 @@
 					<parameter name="dynamic">DATASOURCE:PLAYLIST</parameter>
 					<access>
 						<parameter name="dynamic">RANDOM:FROMFILESINGLETON</parameter>
-						<parameter name="source">/USAR/MELHOR/COLECAO/PadraoAcessoPlaylistMusicaantiga_5milhoes.txt</parameter>
+						<parameter name="source">/home/thais/Documents/Redes/CdnP2P/Arquivos/Dados_Simulacao_ColecaoEntretenimento/PadraoAcesso_Playlist_Entretenimento_Agosto2012.out</parameter>
 					</access>
 					<catalog>
 						<parameter name="dynamic">DATACATALOG:FROMPLAYLISTSINGLETON</parameter>
-						<parameter name="setlist">USAR/MELHOR/COLECAO/PlaylistMusica_Agosto2012.txt</parameter>
-						<parameter name="collection">USAR/MELHOR/COLECAO/ColecaoPlaymusica_Agosto_2012.txt</parameter>
-						<parameter name="length">22550</parameter>
+						<parameter name="setlist">/home/thais/Documents/Redes/CdnP2P/Arquivos/Dados_Simulacao_ColecaoEntretenimento/PlaylistsEntretenimento_Agosto2012.txt</parameter>
+						<parameter name="collection">/home/thais/Documents/Redes/CdnP2P/Arquivos/Dados_Simulacao_ColecaoEntretenimento/ColecaoVideos_Playlist_Entretenimento_Agosto2012.txt</parameter>
+						<parameter name="length">11614</parameter>
 					</catalog>
 				</datasource>
 			</content>
 		</peer>
 	</tier>
-	<tier size="9000">
-		<search>
-			<policyx>
-				<parameter name="dynamic">SEARCH:RANDOMWALK</parameter>
-				<parameter name="maxTries">30</parameter>
-			</policyx>	
+	<tier size="800">	
+		<search>	
 			<policy>
 				<parameter name="dynamic">SEARCH:FLOADING</parameter>
-				<parameter name="maxLevels">3</parameter>
+				<parameter name="maxLevels">4</parameter>
 			</policy>	
 		</search>
 		<peer>
@@ -87,13 +78,12 @@
 			</cache>
 			<profile>
 				<parameter name="dynamic">PROFILE:JACCARD</parameter>
-				<parameterx name="dynamic">PROFILE:ANDERBERG</parameterx>
+				<parameter name="alpha">0.5</parameter>
 			</profile>
 			<topology>
 				<parameter name="maxConnections">30</parameter>
 				<parameter name="maxAttempts">10</parameter>
 				<manager>
-					<parameterX name="dynamic">TOPOLOGY:RANDOM</parameterX>
 					<parameter name="dynamic">TOPOLOGY:PROACTIVE</parameter>
 				</manager>
 			</topology>
@@ -106,7 +96,7 @@
 					</pick>
 				</join>
 				<leave>
-					<parameter name="dynamic">SESSIONLASTING:RANDOM</parameter>
+				<parameter name="dynamic">SESSIONLASTING:RANDOM</parameter>
 					<pick>
 						<parameter name="dynamic">RANDOM:EXPONENTIALSINGLETON</parameter>
 						<parameter name="mean">86400</parameter>
@@ -122,12 +112,12 @@
 					<parameter name="dynamic">DATASOURCE:COLLECTION</parameter>
 					<access>
 						<parameter name="dynamic">RANDOM:FROMFILESINGLETON</parameter>
-						<parameter name="source">USAR/MELHOR/COLECAO/traces/music/PadraoAcessoYoutubeCollectionMusic_Agosto2012.txt</parameter>
+						<parameter name="source">/home/thais/Documents/Redes/CdnP2P/Arquivos/Dados_Simulacao_ColecaoEntretenimento/Padrao_Acesso_ColecaoYouTubeEntretenimento.out</parameter>
 					</access>
 					<catalog>
 						<parameter name="dynamic">DATACATALOG:FROMCOLLECTIONSINGLETON</parameter>
-						<parameter name="collection">USAR/MELHOR/COLECAO/traces/music/YoutubeCollectionMusic_Agosto2012.txt</parameter>
-						<parameter name="length">535687</parameter>
+						<parameter name="collection">/home/thais/Documents/Redes/CdnP2P/Arquivos/Dados_Simulacao_ColecaoEntretenimento/ColecaoYoutube_Entretenimento.txt</parameter>
+						<parameter name="length">415610</parameter>
 					</catalog>
 				</datasource>
 			</content>

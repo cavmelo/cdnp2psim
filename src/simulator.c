@@ -450,7 +450,7 @@ int main(int argc, char **argv){
 	warmupTime = 6048;
 	scale = 24*60*60;
 
-	char *entry = (char*)"/data/research/p2p/traces/music/scenario1.xml";
+	char *entry = (char*)"/home/thais/Documents/Redes/CdnP2P/src/scenario-proactive.xml";
 
 	initSimulator(simTime, &community, &queue, &hashTable, &systemData, entry);
 
