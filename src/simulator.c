@@ -284,6 +284,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 
 					community->collectStatistics(community, &hitRate, &missRate, &byteHitRate, &byteMissRate, &totalRequests, &peersUp, &hitRateCom);
 
+					printf("Stats: ");
 					printf("%lu ", clock-warmupTime);
 					printf("%f %f ", hitRate, missRate);
 					//printf("%f %f ", byteHitRate, byteMissRate);
