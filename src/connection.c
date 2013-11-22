@@ -15,6 +15,18 @@
 
 enum {UNDEFINED=0, REQUESTED=1, ACCEPTED=2, CONNECTED=3, TEARDOWN=4, CLOSED=5, REJECTED=6, ABORTED=7, CLEANED=8};
 
+char* STATUS_LIST[] = {
+	"UNDEFINED",
+	"REQUESTED",
+	"ACCEPTED",
+	"CONNECTED",
+	"TEARDOWN",
+	"CLOSED",
+	"REJECTED",
+	"ABORTED",
+	"CLEANED"
+};
+
 /* ! stats for a going on connection from a client side
  *
  */
@@ -791,7 +803,7 @@ static void showClientEstablishedConnectionsConnManager(TConnManager *connManage
 	for(i=0;i<occup;i++){
 		conn = connections->getElement(connections,i);
 		if (conn->getStatusClient(conn) == CONNECTED)
-			printf("c:%d %d %d %d\n", conn->getIdClient(conn),conn->getIdServer(conn), conn->getStatusClient(conn), conn->getStatusServer(conn));
+			printf("c:\t%d\t%d\t%s\t%s\n", conn->getIdClient(conn),conn->getIdServer(conn), STATUS_LIST[conn->getStatusClient(conn)], STATUS_LIST[conn->getStatusServer(conn)]);
 	}
 
 }
