@@ -18,6 +18,10 @@
 
 #define LENGTH_VIDEO_CATALOG 413524
 
+#define MINUTES_TO_SECONDS	60
+#define HOURS_TO_SECONDS	60*MINUTES_TO_SECONDS
+#define DAYS_TO_SECONDS		24*HOURS_TO_SECONDS
+#define WEEKS_TO_SECONDS	7*DAYS_TO_SECONDS
 
 //extreme replication control policy
 //
@@ -446,9 +450,9 @@ int main(int argc, char **argv){
 	unsigned int simTime, warmupTime, scale;
 
 
-	simTime = 1000*604800;
-	warmupTime = 6048;
-	scale = 24*60*60;
+	simTime = 2*DAYS_TO_SECONDS;
+	warmupTime = 8*HOURS_TO_SECONDS;
+	scale = DAYS_TO_SECONDS;
 
 	char *entry = (char*)"/home/thais/Documents/Redes/CdnP2P/src/scenario-proactive.xml";
 
