@@ -451,9 +451,9 @@ int main(int argc, char **argv){
 	unsigned int simTime, warmupTime, scale;
 
 
-	simTime = 2*DAYS_TO_SECONDS;
+	simTime = 1*DAYS_TO_SECONDS;
 	warmupTime = 8*HOURS_TO_SECONDS;
-	scale = DAYS_TO_SECONDS;
+	scale = HOURS_TO_SECONDS;
 
 	char *entry = (char*)"/home/thais/Documents/Redes/CdnP2P/src/scenario-proactive.xml";
 
