@@ -24,7 +24,13 @@
 				<manager>
 					<parameter name="dynamic">TOPOLOGY:PROACTIVE</parameter>
 				</manager>
-			</topology>		
+			</topology>	
+			//Canal
+			<channel>	
+				<parameter name="capacity">512</parameter>
+				<parameter name="rateUplink">256</parameter>
+
+			</channel>		
 			<churn>
 				<join>
 					<parameter name="dynamic">SESSIONLASTING:PLAYLIST</parameter> 
