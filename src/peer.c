@@ -256,12 +256,15 @@ struct _data_peer{
     TTopology *topology;
     //! policies for profile estimation
     TProfilePolicyPeer *profilePolicy;
+
+    //Canal
+    TChannel *channel;
 };
 
 
 
 
-TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topology ){
+TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topology, void *channel){
 	TDataPeer *data = malloc(sizeof(TDataPeer));
 
 	data->id = id;
@@ -281,6 +284,9 @@ TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dy
 	data->topology = topology;
 
 	data->Queries = createDictionary();
+
+	//Canal
+	data->channel = channel;
 
 	return data;
 }
@@ -590,10 +596,11 @@ static void showMapQueryPeer(TPeer* peer){
 }
 
 
-TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topo ){
+TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topo, void *channel){
     TPeer *p = (TPeer*)malloc(sizeof(TPeer));
 
-    p->data = initDataPeer(id, tier, dynamicJoin, dynamicLeave, dynamicRequest, dataSource, replicate, cache, topo );
+    //Canal
+    p->data = initDataPeer(id, tier, dynamicJoin, dynamicLeave, dynamicRequest, dataSource, replicate, cache, topo, channel);
 
     p->getOnStats = getOnStatsPeer;
     p->getId = getIdPeer;
