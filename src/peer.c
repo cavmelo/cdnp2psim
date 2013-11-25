@@ -286,8 +286,8 @@ TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dy
 	data->Queries = createDictionary();
 
 	//Canal
-	//data->channel = channel;
-	data->channel = createChannel();
+	data->channel = channel;
+	//data->channel = createDataChannel();
 
 	return data;
 }
