@@ -400,6 +400,19 @@ static void* getTopologyManagerPeer(TPeer *peer){
 	return data->topology;
 }
 
+//Canal
+static void setChannelPeer(TPeer *peer, void *channel){
+	TDataPeer *data = peer->data;
+
+	data->channel = channel;
+}
+
+static void* getChannelPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->channel;
+}
+
 static TStatsPeer* getOnStatsPeer(TPeer *peer){
 	TDataPeer *data = peer->data;
 	return data->stats;
@@ -634,6 +647,10 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
 
     p->getTopologyManager = getTopologyManagerPeer;
     p->setTopologyManager = setTopologyManagerPeer;
+
+    //Canal
+    p->getChannel = getChannelPeer;
+    p->setChannel = setChannelPeer;
 
     p->setTier = setTierPeer;
     p->getTier = getTierPeer;

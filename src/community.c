@@ -323,6 +323,34 @@ static void* setupSearchingCommunity(int id, xmlDocPtr doc, TSymTable *searching
 	return searching;
 }
 
+//Setup Canal
+static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc, TSymTable *channelST){
+	char xpath[1000]={[0]='\0'};
+	char *xdynamic=NULL, *xCapacity=NULL, *xRateUplink=NULL;
+	char pars[1000]={[0]='\0'}, *parameter=NULL, *value=NULL;
+	char entry[1000]={[0]='\0'};
+	char *separator = ";";
+	char *last=NULL;
+
+	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"capacity\"]",id+1);
+	xCapacity = xgetOneParameter(doc, xpath);
+	sprintf(entry,"%s;",xCapacity); free(xCapacity);
+	//
+	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"rateUplink\"]",id+1);
+	xRateUplink = xgetOneParameter(doc, xpath);
+	sprintf(entry+strlen(entry),"%s;",xRateUplink); free(xRateUplink);
+
+	//Precisa ainda??
+	sprintf(entry+strlen(entry),"%d;",peer->getId(peer));
+
+	
+	void *channel = topologyST->caller(channelST,xdynamic,entry);//
+	peer->setChannel(peer,channel);
+
+	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
+
+}
+
 
 static xmlDocPtr readConfigForCommunity(const char *fname){
 	const xmlChar *pattern = (const xmlChar *)"community";
@@ -806,8 +834,8 @@ TCommunity* createCommunity(int simTime, char *scenarios){
 		dataComm->tiers->tier[i].searching = setupSearchingCommunity(i, doc, symTable);
 
 		for(j=0;j<xSize;j++){
-
-			p = createPeer((unsigned int)k, i+1, NULL, NULL, NULL, NULL, NULL, NULL, NULL );
+			//Canal
+			p = createPeer((unsigned int)k, i+1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL );
 
 			// setup
 			setupChurnPeerCommunity(i, p, doc, symTable);
@@ -815,6 +843,8 @@ TCommunity* createCommunity(int simTime, char *scenarios){
 			setupCachePeerCommunity(i, p, doc, symTable);
 			setupTopologyManagerPeerCommunity(i, p, doc, symTable);
 			setupProfilePeerCommunity(i, p, doc, symTable);
+			//Canal
+			setupChannelPeerCommunity(i, p, doc, symTable);
 
 			dataComm->peers[k] = p;
 			k++;
