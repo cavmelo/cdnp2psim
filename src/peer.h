@@ -49,6 +49,11 @@ typedef short (* TIsDownPeer)(TPeer* peer);
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
 typedef void (* TSetTopologyManagerPeer)(TPeer *peer, void* tm);
+
+//Canal
+typedef void *(* TGetChannelPeer)(TPeer *peer);
+typedef void (* TSetChannelPeer)(TPeer *peer, void* tm);
+
 typedef short (* THasCachedPeer)(TPeer *peer, void* object);
 typedef void (* TSetTierPeer)(TPeer *peer, short tier);
 typedef short (*TGetTierPeer)(TPeer *peer);
@@ -64,7 +69,7 @@ typedef void (*TUpdateRequestsMapQueryPeer)(TPeer *peer, unsigned int idSource, 
 typedef void (*TUpdateHitsMapQueryPeer)(TPeer *peer, unsigned int idSource, short hops);
 typedef void (*TShowMapQueryPeer)(TPeer *peer);
 
-TPeer* createPeer(unsigned int id, short tier, void *pickDataOnSessionDynamic, void *pickDataOffSessionDynamic, void *pickDataRequest, void *dataSource, void *replicate, void *cache, void *topologyManager );
+TPeer* createPeer(unsigned int id, short tier, void *pickDataOnSessionDynamic, void *pickDataOffSessionDynamic, void *pickDataRequest, void *dataSource, void *replicate, void *cache, void *topologyManager, void *channel);
 
 struct peer {
 	void *data;
@@ -85,6 +90,10 @@ struct peer {
 		TGetDataSourcePeer getDataSource;
 		TGetTopologyManagerPeer getTopologyManager;
 		TSetTopologyManagerPeer setTopologyManager;
+		//Canal		
+		TGetChannelPeer getChannel;
+		TSetChannelPeer setChannel;
+
 		TSetStatusPeer setStatus;
 		TSetDynamicJoinPeer setDynamicJoin;
 		TSetDynamicLeavePeer setDynamicLeave;

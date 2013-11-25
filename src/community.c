@@ -344,7 +344,7 @@ static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc, TSymTa
 	sprintf(entry+strlen(entry),"%d;",peer->getId(peer));
 
 	
-	void *channel = topologyST->caller(channelST,xdynamic,entry);//
+	void *channel = channelST->caller(channelST,xdynamic,entry);//
 	peer->setChannel(peer,channel);
 
 	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
