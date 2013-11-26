@@ -66,6 +66,12 @@ static TDataChannel *initDataChannel(float capacity, float rate_uplink){
 
 enum {UPLINK = 1, DOWNLINK=2, UNDEFINED=3};
 
+static short canStreamDataChannel(TChannel *channel, float rate){
+	TDataChannel *data = channel->data;
+
+	return data->rate_uplink > rate ? 1 : 0;
+}
+
 static void closeDLDataChannel(TChannel *channel, unsigned int idPeerDst){
 	TOngoingDataChannel *ongoingDC;
 	TDataChannel *data = channel->data;
@@ -123,6 +129,7 @@ TChannel *createDataChannel(float capacity, float rate_upload){
 
 	channel->data = initDataChannel(capacity, rate_upload);
 
+	channel->canStream = canStreamDataChannel;
 	channel->closeDL = closeDLDataChannel;
 	channel->openDL = openDLDataChannel;
 	channel->closeUL = closeULDataChannel;
