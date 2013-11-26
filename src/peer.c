@@ -9,7 +9,7 @@
 #include "topology.h"
 #include "dictionary.h"
 #include "peer.h"
-#include "channeal.c"
+#include "channel.h"
 
 
 typedef struct profile TProfilePolicyPeer;

@@ -1,5 +1,5 @@
 /*
- * channeal.c
+ * channel.c
  *
  *  Created on: 07/09/2013
  *      Author: cesar
@@ -7,6 +7,8 @@
 #include "stdlib.h"
 #include "dictionary.h"
 #include "internals.h"
+
+#include "channel.h"
 
 typedef struct socket_data_channel{
 	int idPeerSrc;
@@ -46,21 +48,6 @@ typedef struct _data_channel{
 
 } TDataChannel;
 
-typedef struct channel TChannel;
-
-typedef  short (* TOpenDLDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
-typedef  short (* TOpenULDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
-typedef  void (* TCloseDLDataChannel )(TChannel *, unsigned int idPeerDst);
-typedef  void (* TCloseULDataChannel )(TChannel *, unsigned int idPeerSrc);
-
-struct channel{
-	void *data;
-	TOpenDLDataChannel openDL; // open a DownLink data Channel
-	TOpenULDataChannel openUL;
-	TCloseDLDataChannel closeDL; // close a DownLink data Channel
-	TCloseULDataChannel closeUL;
-};
-
 
 static TDataChannel *initDataChannel(float capacity, float rate_uplink){
 	TDataChannel *data = malloc(sizeof(TDataChannel));
@@ -73,9 +60,9 @@ static TDataChannel *initDataChannel(float capacity, float rate_uplink){
 	return data;
 }
 
-bandwidthBroker(){
+/*bandwidthBroker(){
 
-}
+}*/
 
 enum {UPLINK = 1, DOWNLINK=2, UNDEFINED=3};
 
@@ -145,9 +132,9 @@ TChannel *createDataChannel(float capacity, float rate_upload){
 	return channel;
 }
 
-void destroyDataChannel(TChannel *channel){
+/*void destroyDataChannel(TChannel *channel){
 
 	//TDataChannel *data = channel->data;
 
 
-}
+}*/
