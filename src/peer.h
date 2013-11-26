@@ -126,3 +126,6 @@ void *createJaccardContentProfilePeer(void *entry);
 void *createRandomSessionLasting(void *entry);
 void *createPlaylistSessionLasting(void *entry);
 void *createPartialPlaylistSessionLasting(void *entry);
+
+typedef struct _data_peer TDataPeer;
+
