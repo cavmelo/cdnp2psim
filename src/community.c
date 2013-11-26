@@ -27,6 +27,7 @@
 
 #include "xmlparserconfig.h"
 
+#include "channel.h"
 #include "community.h"
 
 typedef struct _tier TTier;
@@ -324,31 +325,29 @@ static void* setupSearchingCommunity(int id, xmlDocPtr doc, TSymTable *searching
 }
 
 //Setup Canal
-static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc, TSymTable *channelST){
+static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc){
 	char xpath[1000]={[0]='\0'};
-	char *xdynamic=NULL, *xCapacity=NULL, *xRateUplink=NULL;
+	char *xCapacity=NULL, *xRateUplink=NULL;
 	char pars[1000]={[0]='\0'}, *parameter=NULL, *value=NULL;
 	char entry[1000]={[0]='\0'};
 	char *separator = ";";
 	char *last=NULL;
+	float capacity;
+	float rateUplink;
+	TChannel *channel;
 
 	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"capacity\"]",id+1);
 	xCapacity = xgetOneParameter(doc, xpath);
-	sprintf(entry,"%s;",xCapacity); free(xCapacity);
+	capacity = atof((char*)xCapacity);
+	free(xCapacity);
 	//
 	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"rateUplink\"]",id+1);
 	xRateUplink = xgetOneParameter(doc, xpath);
-	sprintf(entry+strlen(entry),"%s;",xRateUplink); free(xRateUplink);
+	rateUplink = atof((char*)xRateUplink);
+	free(xRateUplink);
 
-	//Precisa ainda??
-	sprintf(entry+strlen(entry),"%d;",peer->getId(peer));
-
-	
-	void *channel = channelST->caller(channelST,xdynamic,entry);//
+	channel = createDataChannel(capacity, rateUplink);
 	peer->setChannel(peer,channel);
-
-	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
-
 }
 
 
@@ -844,7 +843,7 @@ TCommunity* createCommunity(int simTime, char *scenarios){
 			setupTopologyManagerPeerCommunity(i, p, doc, symTable);
 			setupProfilePeerCommunity(i, p, doc, symTable);
 			//Canal
-			setupChannelPeerCommunity(i, p, doc, symTable);
+			setupChannelPeerCommunity(i, p, doc);
 
 			dataComm->peers[k] = p;
 			k++;
