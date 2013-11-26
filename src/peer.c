@@ -556,7 +556,7 @@ static short canStream(TPeer* peer, void *object){
 		videoRate = getVideoRate(object);
 		
 	// 3o) Chamar peer->canStream com essa taxa
-	return peer->channel->canStrem(object, videoRate);
+	return data->channel->canStream(object, videoRate);
 }
 
 static void* getProfilePeer(TPeer* peer){
