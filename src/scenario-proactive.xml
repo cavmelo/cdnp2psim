@@ -25,7 +25,7 @@
 					<parameter name="dynamic">TOPOLOGY:PROACTIVE</parameter>
 				</manager>
 			</topology>	
-			//Canal
+			<!-- Canal -->
 			<channel>	
 				<parameter name="capacity">512</parameter>
 				<parameter name="rateUplink">256</parameter>
@@ -93,6 +93,12 @@
 					<parameter name="dynamic">TOPOLOGY:PROACTIVE</parameter>
 				</manager>
 			</topology>
+			<!-- Canal -->
+			<channel>	
+				<parameter name="capacity">512</parameter>
+				<parameter name="rateUplink">256</parameter>
+
+			</channel>		
 			<churn>
 				<join>
 					<parameter name="dynamic">SESSIONLASTING:RANDOM</parameter>
