@@ -409,7 +409,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			// Update DOWN time Stats
 			addDownTimeStatsPeer( peer->getOnStats(peer), (timeEvent>SimTime?(SimTime-clock):(timeEvent-clock)));
 
-		}else if( (typeEvent == REQUEST) && (peer->isUp(peer)) ){
+		}else if( (typeEvent == REQUEST) && (peer->isUp(peer)) &&(peer->channel->rate_downlink > 0)){
 			//Processing Request event
 			videoLength = processRequestSimulator(idPeer, hashTable, community, sysInfo);
 
