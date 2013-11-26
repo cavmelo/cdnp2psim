@@ -26,6 +26,8 @@ struct _data_object {
 	float cumulativeValue;
 	float normalizedByteServed;
 	char upload[26]; // upload data
+
+	float videoRate;
 };
 
 //Object related implementations
@@ -63,6 +65,7 @@ TObject* initObject(TIdObject id, int length, int gPopularity, int lPopularity) 
 	dataObj->accessFrequency = 0;
 	dataObj->cumulativeValue = 0;
 	dataObj->normalizedByteServed = 0;
+	dataObj->videoRate = 0;
 
 	object->data = dataObj;
 
@@ -115,6 +118,7 @@ void showObject(TObject *p) {
 	printf("%lu ", data->lastAccess);
 	printf("%f ", data->cumulativeValue);
 	printf("%f ", data->normalizedByteServed);
+	printf("%f ", data->videoRate);
 	printf("\n");
 }
 
@@ -206,6 +210,12 @@ void getIdObject(TObject *object, TIdObject id) {
 	strcpy(id, data->id);
 }
 
+float getVideoRateAccess(TObject *object) {
+	TDataObject *data = object->data;
+	return data->videoRate;
+}
+
+
 //static TObject* getPrevObject(TObject* object) {
 //	TDataObject *data = object->data;
 //	return NULL;//data->prev;
@@ -239,6 +249,11 @@ void setAccessFrequencyObject(TObject *object, float accessFrequency) {
 void setStoredObject(TObject *object, int stored) {
 	TDataObject *data = object->data;
 	data->stored = stored;
+}
+
+void setVideoRateObject(TObject *object, float videoRate) {
+	TDataObject *data = object->data;
+	data->videoRate = videoRate;
 }
 
 void addStoredObject(TObject *object, int quantum) {
