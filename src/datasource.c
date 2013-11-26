@@ -194,6 +194,8 @@ static TFromCollectionDataCatalog *initFromCollectionDataCatalog(char *filename,
 		setCumulativeValueObject(objects[i], 0.0);
 		setNormalizedByteServedObject(objects[i], 0.0);
 
+		//setVideoRateObject(object, duration*0.05);
+
 		i++;
 		//fscanf(fp, "%s %d %d %d %d %f", idVideo, &min, &sec, &views,  &stars, &ratings);
 		fscanf(fp, "%s %d %d %d %d %f %s", idVideo, &min, &sec, &views, &stars,
@@ -371,6 +373,8 @@ TSetList **initFromPlayListDataCatalog(char *playLists, unsigned int length,
 		setLastAccessObject(object, 0);
 		setCumulativeValueObject(object, 0.0);
 		setNormalizedByteServedObject(object, 0.0);
+
+		//setVideoRateObject(object, duration*0.05);
 
 		key = d->keyGenesis(idVideo);
 		d->insert(d, key, object);
