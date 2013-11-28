@@ -544,19 +544,21 @@ static short hasCachedPeer(TPeer* peer, void *object){
 	//return (data->status == DOWN_PEER);
 }
 
-static short canStream(TPeer* peer, void *object){
+static short canStreamPeer(TPeer* peer, void *object){
 	TDataPeer *data = peer->data;
 	TCache *cache = data->cache;
-	float videoRate;
+	TChannel *channel = data->channel;
+	float bitRate;
 
-	// TODO:
 	// 1o) Verificar se tem no cache
-	if (peer->hasCached(peer, object)) 
-		// 2o) Obter a taxa necessária do vídeo
-		videoRate = getVideoRate(object);
+	if (!peer->hasCached(peer, object)) 
+		return 0;
+
+	// 2o) Obter a taxa necessária do vídeo
+	bitRate = getBitRateObject(object);
 		
-	// 3o) Chamar peer->canStream com essa taxa
-	return data->channel->canStream(object, videoRate);
+	// 3o) Chamar channel->canStream com essa taxa
+	return channel->canStream(channel, videoRate);
 }
 
 static void* getProfilePeer(TPeer* peer){
