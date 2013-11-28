@@ -30,6 +30,7 @@ void getIdObject(TObject *object, char* id);
 float getRatingObject(TObject *object);
 char* getUploadObject(TObject * object);
 float getNormalizedByteServedObject(TObject *object);
+float getBitRateObject(TObject *object);
 //TObject* getNextObject(TObject *object);
 //TObject* getPrevObject(TObject *object);
 
@@ -41,6 +42,7 @@ void setStoredObject(TObject *object, int stored);
 void setNormalizedByteServedObject(TObject *object, float normalizedByteServed);
 void setRatingObject(TObject *object, float rating);
 void setUploadObject(TObject * object, char* upload);
+void setBitRateObject(TObject *object, float bitRate);
 
 void addStoredObject(TObject *object, int quantum);
 void addNormalizedByteServedObject(TObject *object, int quantum);

@@ -27,7 +27,7 @@ struct _data_object {
 	float normalizedByteServed;
 	char upload[26]; // upload data
 
-	float videoRate;
+	float bitRate;
 };
 
 //Object related implementations
@@ -65,7 +65,7 @@ TObject* initObject(TIdObject id, int length, int gPopularity, int lPopularity) 
 	dataObj->accessFrequency = 0;
 	dataObj->cumulativeValue = 0;
 	dataObj->normalizedByteServed = 0;
-	dataObj->videoRate = 0;
+	dataObj->bitRate = 0;
 
 	object->data = dataObj;
 
@@ -118,7 +118,7 @@ void showObject(TObject *p) {
 	printf("%lu ", data->lastAccess);
 	printf("%f ", data->cumulativeValue);
 	printf("%f ", data->normalizedByteServed);
-	printf("%f ", data->videoRate);
+	printf("%f ", data->bitRate);
 	printf("\n");
 }
 
@@ -210,9 +210,9 @@ void getIdObject(TObject *object, TIdObject id) {
 	strcpy(id, data->id);
 }
 
-float getVideoRateAccess(TObject *object) {
+float getBitRateObject(TObject *object) {
 	TDataObject *data = object->data;
-	return data->videoRate;
+	return data->bitRate;
 }
 
 
@@ -251,9 +251,9 @@ void setStoredObject(TObject *object, int stored) {
 	data->stored = stored;
 }
 
-void setVideoRateObject(TObject *object, float videoRate) {
+void setBitRateObject(TObject *object, float bitRate) {
 	TDataObject *data = object->data;
-	data->videoRate = videoRate;
+	data->bitRate = bitRate;
 }
 
 void addStoredObject(TObject *object, int quantum) {
