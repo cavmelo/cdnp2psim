@@ -7,6 +7,7 @@ typedef  short (* TOpenDLDataChannel )(TChannel *, int idPeerSrc, int idPeerDst,
 typedef  short (* TOpenULDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
 typedef  void (* TCloseDLDataChannel )(TChannel *, unsigned int idPeerDst);
 typedef  void (* TCloseULDataChannel )(TChannel *, unsigned int idPeerSrc);
+typedef  short (* THasDownlinkChannel )(TChannel *);
 
 struct channel{
 	void *data;
@@ -15,4 +16,6 @@ struct channel{
 	TOpenULDataChannel openUL;
 	TCloseDLDataChannel closeDL; // close a DownLink data Channel
 	TCloseULDataChannel closeUL;
+	THasDownlinkChannel hasDownlink;
 };
+
