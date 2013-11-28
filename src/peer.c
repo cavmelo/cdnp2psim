@@ -669,6 +669,7 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
     //Canal
     p->getChannel = getChannelPeer;
     p->setChannel = setChannelPeer;
+    p->canStream = canStreamPeer;
 
     p->setTier = setTierPeer;
     p->getTier = getTierPeer;

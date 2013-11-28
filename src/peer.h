@@ -49,6 +49,7 @@ typedef short (* TIsDownPeer)(TPeer* peer);
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
 typedef void (* TSetTopologyManagerPeer)(TPeer *peer, void* tm);
+typedef short (* TCanStreamPeer)(TPeer *peer, void *object);
 
 //Canal
 typedef void *(* TGetChannelPeer)(TPeer *peer);
@@ -93,6 +94,7 @@ struct peer {
 		//Canal		
 		TGetChannelPeer getChannel;
 		TSetChannelPeer setChannel;
+		TCanStreamPeer canStream;
 
 		TSetStatusPeer setStatus;
 		TSetDynamicJoinPeer setDynamicJoin;
