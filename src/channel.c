@@ -75,7 +75,7 @@ static short canStreamDataChannel(TChannel *channel, float rate){
 static short hasDownlinkChannel(TChannel *channel) {
 	TDataChannel *data = channel->data;
 
-	return data->rate_downlinklink > 0 ? 1 : 0;
+	return data->rate_downlink > 0 ? 1 : 0;
 }
 
 static void closeDLDataChannel(TChannel *channel, unsigned int idPeerDst){
