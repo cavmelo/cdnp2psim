@@ -90,11 +90,11 @@ static void closeDLDataChannel(TChannel *channel, unsigned int idPeerDst){
 }
 
 
-static void closeULDataChannel(TChannel *channel, unsigned int idPeerSrc){
+static void closeULDataChannel(TChannel *channel, unsigned int idPeerDst){
 	TOngoingDataChannel *ongoingDC;
 	TDataChannel *data = channel->data;
 
-	ongoingDC = data->ongoingUL->remove(data->ongoingUL,idPeerSrc);
+	ongoingDC = data->ongoingUL->remove(data->ongoingUL,idPeerDst);
 	data->rate_uplink += ongoingDC->eb;
 
 	free(ongoingDC);
@@ -106,7 +106,7 @@ static short openULDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, 
 
 	if (data->rate_uplink >= eb){
 		TOngoingDataChannel *ongDC = createOngoingDataChannel(eb, idPeerSrc, idPeerDst);
-		data->ongoingUL->insert(data->ongoingUL, idPeerSrc, ongDC);
+		data->ongoingUL->insert(data->ongoingUL, idPeerDst, ongDC);
 		data->rate_uplink -= eb;
 		opened = 1; // true
 	}

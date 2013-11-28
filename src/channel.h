@@ -6,7 +6,7 @@ typedef  short (* TCanStreamDataChannel )(TChannel *, float rate);
 typedef  short (* TOpenDLDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
 typedef  short (* TOpenULDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
 typedef  void (* TCloseDLDataChannel )(TChannel *, unsigned int idPeerDst);
-typedef  void (* TCloseULDataChannel )(TChannel *, unsigned int idPeerSrc);
+typedef  void (* TCloseULDataChannel )(TChannel *, unsigned int idPeerDst);
 typedef  short (* THasDownlinkChannel )(TChannel *);
 
 struct channel{
