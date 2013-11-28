@@ -536,6 +536,12 @@ static short isDownPeer(TPeer* peer){
 	return (data->status == DOWN_PEER);
 }
 
+static short hasDownlinkPeer(TPeer* peer){
+	TDataPeer *data = peer->data;
+	TChannel *channel = data->channel;
+	return channel->hasDownlink(channel);
+}
+
 static short hasCachedPeer(TPeer* peer, void *object){
 	TDataPeer *data = peer->data;
 	TCache *cache = data->cache;
@@ -657,6 +663,7 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
     p->isDown = isDownPeer;
     p->setupJoining = setupJoiningPeer;
     p->hasCached = hasCachedPeer;
+    p->hasDownlink = hasDownlinkPeer;
 
     p->insertCache = insertCachePeer;
     p->updateCache = updateCachePeer;

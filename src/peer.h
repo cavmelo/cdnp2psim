@@ -46,6 +46,7 @@ typedef void (* TSetCachePeer)(TPeer* peer, void *cache);
 typedef void (* TSetDataSourcePeer)(TPeer *peer, void *dataSource);
 typedef short (* TIsUpPeer)(TPeer* peer);
 typedef short (* TIsDownPeer)(TPeer* peer);
+typedef short (* THasDownlinkPeer)(TPeer *peer);
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
 typedef void (* TSetTopologyManagerPeer)(TPeer *peer, void* tm);
@@ -105,6 +106,7 @@ struct peer {
 		TSetupJoiningPeer setupJoining;
 		TIsUpPeer isUp;
 		TIsDownPeer isDown;
+		THasDownlinkPeer hasDownlink;
 		THasCachedPeer hasCached;
 		TSetTierPeer setTier;
 		TGetTierPeer getTier;
