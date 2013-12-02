@@ -55,6 +55,8 @@ typedef short (* TCanStreamPeer)(TPeer *peer, void *object);
 //Canal
 typedef void *(* TGetChannelPeer)(TPeer *peer);
 typedef void (* TSetChannelPeer)(TPeer *peer, void* tm);
+typedef void *(* TGetCurrentlyViewingPeer)(TPeer *peer);
+typedef void (* TSetCurrentlyViewingPeer)(TPeer *peer, void* video);
 
 typedef short (* THasCachedPeer)(TPeer *peer, void* object);
 typedef void (* TSetTierPeer)(TPeer *peer, short tier);
@@ -95,6 +97,9 @@ struct peer {
 		//Canal		
 		TGetChannelPeer getChannel;
 		TSetChannelPeer setChannel;
+		TGetCurrentlyViewingPeer getCurrentlyViewing;
+		TSetCurrentlyViewingPeer setCurrentlyViewing;
+
 		TCanStreamPeer canStream;
 
 		TSetStatusPeer setStatus;

@@ -191,6 +191,9 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 	dataSource = peer->getDataSource(peer);
 	video = dataSource->pick(dataSource);
 
+	//set video that the peer is currently viewing
+	peer->setCurrentlyViewing(peer, video);
+
 	serverPeer = community->searching(community,peer,video);
 
 	videoLength = getLengthObject(video);

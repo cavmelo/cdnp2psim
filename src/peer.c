@@ -260,6 +260,8 @@ struct _data_peer{
 
     //Canal
     TChannel *channel;
+
+    TObject *currentlyViewing;
 };
 
 
@@ -288,7 +290,8 @@ TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dy
 
 	//Canal
 	data->channel = channel;
-	//data->channel = createDataChannel();
+
+	data->currentlyViewing = NULL;
 
 	return data;
 }
@@ -408,10 +411,34 @@ static void setChannelPeer(TPeer *peer, void *channel){
 	data->channel = channel;
 }
 
+//Canal
+static void setCurrentlyViewingPeer(TPeer *peer, void *currentlyViewing){
+	TDataPeer *data = peer->data;
+	TIdObject id;
+
+	getIdObject(currentlyViewing, id);
+	
+	printf("Currently viewing(setting %lx): %lx - %s\n", (unsigned long)currentlyViewing, (unsigned long)peer, id);
+	fflush(stdout);
+	data->currentlyViewing = currentlyViewing;
+}
+
 static void* getChannelPeer(TPeer *peer){
 	TDataPeer *data = peer->data;
 
 	return data->channel;
+}
+
+static void* getCurrentlyViewingPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	TIdObject id;
+
+	getIdObject(data->currentlyViewing, id);
+	printf("Currently viewing(getting %lx): %lx - %s\n", (unsigned long)data->currentlyViewing, (unsigned long)peer, id);
+	fflush(stdout);
+
+	return data->currentlyViewing;
 }
 
 static TStatsPeer* getOnStatsPeer(TPeer *peer){
@@ -653,12 +680,14 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
     p->getCache = getCachePeer;
     p->getReplicate = getReplicatePeer;
     p->getDataSource = getDataSourcePeer;
+    p->getCurrentlyViewing = getCurrentlyViewingPeer;
     p->setStatus = setStatusPeer;
     p->setDynamicJoin = setDynamicJoinPeer;
     p->setDynamicLeave = setDynamicLeavePeer;
     p->setDynamicRequest = setDynamicRequestPeer;
     p->setCache = setCachePeer;
     p->setDataSource = setDataSourcePeer;
+    p->setCurrentlyViewing = setCurrentlyViewingPeer;
     p->isUp = isUpPeer;
     p->isDown = isDownPeer;
     p->setupJoining = setupJoiningPeer;
