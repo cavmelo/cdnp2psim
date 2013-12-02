@@ -50,7 +50,7 @@ typedef short (* THasDownlinkPeer)(TPeer *peer);
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
 typedef void (* TSetTopologyManagerPeer)(TPeer *peer, void* tm);
-typedef short (* TCanStreamPeer)(TPeer *peer, void *object);
+typedef short (* TCanStreamPeer)(TPeer *peer, void *video);
 
 //Canal
 typedef void *(* TGetChannelPeer)(TPeer *peer);
