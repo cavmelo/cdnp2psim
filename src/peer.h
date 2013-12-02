@@ -47,6 +47,12 @@ typedef void (* TSetDataSourcePeer)(TPeer *peer, void *dataSource);
 typedef short (* TIsUpPeer)(TPeer* peer);
 typedef short (* TIsDownPeer)(TPeer* peer);
 typedef short (* THasDownlinkPeer)(TPeer *peer);
+
+typedef void (* TOpenULVideoChannelPeer)(TPeer * peer, unsigned int destId, void *video);
+typedef void (* TOpenDLVideoChannelPeer)(TPeer * peer, unsigned int destId, void *video);
+typedef void (* TCloseULVideoChannelPeer)(TPeer * peer, unsigned int destId);
+typedef unsigned int (* TCloseDLVideoChannelPeer)(TPeer * peer, void *video);
+
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
 typedef void (* TSetTopologyManagerPeer)(TPeer *peer, void* tm);
@@ -112,6 +118,12 @@ struct peer {
 		TIsUpPeer isUp;
 		TIsDownPeer isDown;
 		THasDownlinkPeer hasDownlink;
+
+		TOpenULVideoChannelPeer openULVideoChannel;
+		TOpenDLVideoChannelPeer openDLVideoChannel;
+		TCloseULVideoChannelPeer closeULVideoChannel;
+		TCloseDLVideoChannelPeer closeDLVideoChannel;
+
 		THasCachedPeer hasCached;
 		TSetTierPeer setTier;
 		TGetTierPeer getTier;
