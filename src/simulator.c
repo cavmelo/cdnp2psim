@@ -207,8 +207,6 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 		listEvicted = peer->getEvictedCache(peer);
 		hashTable->removeEvictedItens(hashTable, idPeer, listEvicted);
 
-		free(video);
-
 		//Looking UP peers into keepers
 	}else if ( serverPeer != NULL ){
 
@@ -219,8 +217,9 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 		listEvicted = serverPeer->getEvictedCache(serverPeer);
 		hashTable->removeEvictedItens(hashTable, idServerPeer, listEvicted);
 
-
-		free(video);
+		// Estabelecer canal de dados
+		serverPeer->openULVideoChannel(serverPeer, idPeer, video);
+		peer->openDLVideoChannel(peer, idServerPeer, video);
 	}else{
 
 		//try to insert missed video
@@ -237,13 +236,30 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 			listEvicted = peer->getEvictedCache(peer);
 			hashTable->removeEvictedItens(hashTable, idPeer, listEvicted);
 
-		}else{ // failed (cache full or unwanted video)
-			free(video);
 		}
 	}
 
 	return videoLength;
 }
+
+// Process FINISHED_VIEWING event
+void processFinishedViewingSimulator(TPeer *peer, TCommunity* community){
+	TObject *currentlyViewing = peer->getCurrentlyViewing(peer);
+	unsigned int serverId, clientId;
+
+	TPeer *serverPeer;
+
+	clientId = peer->getId(peer);
+	serverId = peer->closeDLVideoChannel(peer, currentlyViewing);
+
+	if (serverId != 0) {
+		serverPeer = community->getPeer(community, serverId);
+		serverPeer->closeULVideoChannel(serverPeer,clientId);
+	}
+
+	free(currentlyViewing);
+}
+
 
 
 void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int scale, TPriorityQueue* queue, TCommunity* community, THashTable* hashTable, TSystemInfo *sysInfo){
@@ -416,8 +432,14 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			//Processing Request event
 			videoLength = processRequestSimulator(idPeer, hashTable, community, sysInfo);
 
-			//Queuing A Request event based on video length and the user thinking time
-			timeEvent = clock + videoLength + peer->getRequestTime(peer);
+			// Queue a FINISHED_VIEWING event after the duration of the video
+			timeEvent = clock + videoLength;
+			event  = createEvent((TTimeEvent) timeEvent, FINISHED_VIEWING, (TOwnerEvent)idPeer);
+			queue->enqueue(queue, timeEvent, event);
+		}else if( (typeEvent == FINISHED_VIEWING) && peer->isUp(peer)){
+			processFinishedViewingSimulator(peer,community);
+			//Queuing A Request event based on the user thinking time
+			timeEvent = clock + peer->getRequestTime(peer);
 			event  = createEvent((TTimeEvent) timeEvent, REQUEST, (TOwnerEvent)idPeer);
 			queue->enqueue(queue, timeEvent, event);
 
