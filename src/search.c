@@ -37,7 +37,7 @@ static void* runRandomWalkSearch(TSearch *search, void *vPeer, void *object ){
 		TTopology *topo = peer->getTopologyManager(peer);
 		found = 1;
 
-		if (!peer->hasCached(peer,object)){
+		if (!peer->canStream(peer,object)){
 			TArrayDynamic *neighbors = topo->getNeighbors(topo);
 			if (idRequester >= 0){
 				topo->updateRequestsStats(topo, idRequester, 1);
@@ -148,7 +148,7 @@ static void* runFloadingSearch(TSearch *search, void* vPeer, void* object){
 	do{
 		TTopology *topo = peer->getTopologyManager(peer);
 
-		if ( (!peer->hasCached(peer,object)) ) {
+		if (!peer->canStream(peer,object)){
 			TArrayDynamic *neighbors = topo->getNeighbors(topo);
 			if (idRequester>=0){
 				topo->updateRequestsStats(topo,idRequester,1);
