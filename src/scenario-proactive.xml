@@ -27,8 +27,8 @@
 			</topology>	
 			<!-- Canal -->
 			<channel>	
-				<parameter name="capacity">512</parameter>
-				<parameter name="rateUplink">256</parameter>
+				<parameter name="capacity">768</parameter>
+				<parameter name="rateUplink">512</parameter>
 
 			</channel>		
 			<churn>
@@ -95,8 +95,8 @@
 			</topology>
 			<!-- Canal -->
 			<channel>	
-				<parameter name="capacity">512</parameter>
-				<parameter name="rateUplink">256</parameter>
+				<parameter name="capacity">768</parameter>
+				<parameter name="rateUplink">512</parameter>
 
 			</channel>		
 			<churn>
