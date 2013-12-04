@@ -245,15 +245,16 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 // Process FINISHED_VIEWING event
 void processFinishedViewingSimulator(TPeer *peer, TCommunity* community){
 	TObject *currentlyViewing = peer->getCurrentlyViewing(peer);
-	unsigned int serverId, clientId;
+	int serverId;
+	unsigned int clientId;
 
 	TPeer *serverPeer;
 
 	clientId = peer->getId(peer);
 	serverId = peer->closeDLVideoChannel(peer, currentlyViewing);
 
-	if (serverId != 0) {
-		serverPeer = community->getPeer(community, serverId);
+	if (serverId >= 0) {
+		serverPeer = community->getPeer(community, (unsigned int)serverId);
 		serverPeer->closeULVideoChannel(serverPeer,clientId);
 	}
 

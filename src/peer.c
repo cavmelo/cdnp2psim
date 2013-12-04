@@ -597,7 +597,7 @@ static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *vi
 	channel->openDL(channel, data->id, destId, bitRate);
 }
 
-static unsigned int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
+static int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
 	TDictionary *d = data->videosReceiving;
@@ -612,7 +612,7 @@ static unsigned int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
 	content = (unsigned int*)d->remove(d,key);
 
 	if (content == NULL)
-		return 0;
+		return -1;
 
 	destId = *content;
 
