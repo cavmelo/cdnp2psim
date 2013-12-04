@@ -250,6 +250,10 @@ void processFinishedViewingSimulator(TPeer *peer, TCommunity* community){
 
 	TPeer *serverPeer;
 
+	// Se não estiver assistindo nada
+	if (currentlyViewing == NULL)
+		return;
+
 	clientId = peer->getId(peer);
 	serverId = peer->closeDLVideoChannel(peer, currentlyViewing);
 
@@ -258,7 +262,9 @@ void processFinishedViewingSimulator(TPeer *peer, TCommunity* community){
 		serverPeer->closeULVideoChannel(serverPeer,clientId);
 	}
 
-	free(currentlyViewing);
+	peer->setCurrentlyViewing(peer, NULL);
+
+	//free(currentlyViewing);
 }
 
 
