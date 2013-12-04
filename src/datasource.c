@@ -194,7 +194,7 @@ static TFromCollectionDataCatalog *initFromCollectionDataCatalog(char *filename,
 		setCumulativeValueObject(objects[i], 0.0);
 		setNormalizedByteServedObject(objects[i], 0.0);
 
-		setBitRateObject(objects[i], 128);
+		setBitRateObject(objects[i], 128.f);
 
 		i++;
 		//fscanf(fp, "%s %d %d %d %d %f", idVideo, &min, &sec, &views,  &stars, &ratings);
@@ -374,7 +374,7 @@ TSetList **initFromPlayListDataCatalog(char *playLists, unsigned int length,
 		setCumulativeValueObject(object, 0.0);
 		setNormalizedByteServedObject(object, 0.0);
 
-		setBitRateObject(object, 128);
+		setBitRateObject(object, 128.f);
 
 		key = d->keyGenesis(idVideo);
 		d->insert(d, key, object);
