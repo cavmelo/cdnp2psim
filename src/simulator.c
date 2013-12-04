@@ -267,6 +267,33 @@ void processFinishedViewingSimulator(TPeer *peer, TCommunity* community){
 	//free(currentlyViewing);
 }
 
+void closeAllPeerOpenULVideoChannelsSimulator(TPeer *server, TCommunity *community){
+	TDictionary *connectedClients;
+	TPeer *client;
+	TObject *video;
+	unsigned int *clientId;
+
+	connectedClients = server->getOpenULVideoChannels(server);
+
+	clientId = connectedClients->first(connectedClients);
+
+	while(clientId != NULL){
+		client = community->getPeer(community, *clientId);
+		video = client->getCurrentlyViewing(client);
+
+		if (video == NULL) {
+			printf("Video is NULL\n");
+			fflush(stdout);
+		}
+
+		client->closeDLVideoChannel(client, video);
+		server->closeULVideoChannel(server, *clientId);
+
+		client->setCurrentlyViewing(client, NULL);
+
+		clientId = connectedClients->first(connectedClients);
+	}
+}
 
 
 void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int scale, TPriorityQueue* queue, TCommunity* community, THashTable* hashTable, TSystemInfo *sysInfo){
@@ -420,6 +447,10 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 		}else if (typeEvent == LEAVE){ // change it with U need a model without churn
 			// change the peer status to DOWN
 			peer->setStatus(peer, DOWN_PEER);
+
+			// Interrompe visualização do vídeo
+			processFinishedViewingSimulator(peer, community);
+			closeAllPeerOpenULVideoChannelsSimulator(peer, community);
 
 			processTopologySimulator(idPeer, hashTable, community, sysInfo);
 
