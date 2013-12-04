@@ -1,3 +1,5 @@
+#include "dictionary.h"
+
 //stats related definition
 //
 typedef unsigned int TUpTimeStatsPeer;
@@ -51,7 +53,8 @@ typedef short (* THasDownlinkPeer)(TPeer *peer);
 typedef void (* TOpenULVideoChannelPeer)(TPeer * peer, unsigned int destId, void *video);
 typedef void (* TOpenDLVideoChannelPeer)(TPeer * peer, unsigned int destId, void *video);
 typedef void (* TCloseULVideoChannelPeer)(TPeer * peer, unsigned int destId);
-typedef unsigned int (* TCloseDLVideoChannelPeer)(TPeer * peer, void *video);
+typedef int (* TCloseDLVideoChannelPeer)(TPeer * peer, void *video);
+typedef TDictionary *(* TGetOpenULVideoChannelsPeer)(TPeer * peer);
 
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
@@ -123,6 +126,7 @@ struct peer {
 		TOpenDLVideoChannelPeer openDLVideoChannel;
 		TCloseULVideoChannelPeer closeULVideoChannel;
 		TCloseDLVideoChannelPeer closeDLVideoChannel;
+		TGetOpenULVideoChannelsPeer getOpenULVideoChannels;
 
 		THasCachedPeer hasCached;
 		TSetTierPeer setTier;

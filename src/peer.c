@@ -264,6 +264,7 @@ struct _data_peer{
     TObject *currentlyViewing;
 
     TDictionary *videosReceiving;
+    TDictionary *videosSending;
 };
 
 
@@ -296,6 +297,7 @@ TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dy
 	data->currentlyViewing = NULL;
 
 	data->videosReceiving = createDictionary();
+	data->videosSending = createDictionary();
 
 	return data;
 }
@@ -575,8 +577,14 @@ static short isDownPeer(TPeer* peer){
 static void openULVideoChannelPeer(TPeer * peer, unsigned int destId, TObject *video){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
+	TDictionary *d = data->videosSending;
+	TKeyDictionary key;
 	
 	float bitRate = getBitRateObject(video);
+	unsigned int *content = malloc(sizeof(unsigned int));;
+
+	*content = destId;
+	d->insert(d, destId, content);
 
 	channel->openUL(channel, data->id, destId, bitRate);
 }
@@ -631,11 +639,20 @@ static int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
 static void closeULVideoChannelPeer(TPeer * peer, unsigned int destId){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
-	TDictionary *d = data->videosReceiving;
+	TDictionary *d = data->videosSending;
 	TIdObject idVideo;
-	TKeyDictionary key;
+	unsigned int *content;
+
+	content = (unsigned int*)d->remove(d,destId);
+	free(content);
 
 	channel->closeUL(channel, destId);
+}
+
+static TDictionary *getOpenULVideoChannelsPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->videosSending;
 }
 
 static short hasDownlinkPeer(TPeer* peer){
@@ -773,6 +790,7 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
     p->openDLVideoChannel = openDLVideoChannelPeer;
     p->closeULVideoChannel = closeULVideoChannelPeer;
     p->closeDLVideoChannel = closeDLVideoChannelPeer;
+    p->getOpenULVideoChannels = getOpenULVideoChannelsPeer;
 
     p->insertCache = insertCachePeer;
     p->updateCache = updateCachePeer;
