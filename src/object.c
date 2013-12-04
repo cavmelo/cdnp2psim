@@ -87,6 +87,7 @@ void copyObject(TObject *src, TObject *dest) {
 	dataDest->normalizedByteServed = dataSrc->normalizedByteServed;
 	strcpy(dataDest->upload, dataSrc->upload);
 	dataDest->rating = dataSrc->rating;
+	dataDest->bitRate = dataSrc->bitRate;
 
 }
 
