@@ -420,9 +420,11 @@ static void setCurrentlyViewingPeer(TPeer *peer, void *currentlyViewing){
 	TDataPeer *data = peer->data;
 	TIdObject id;
 
-	getIdObject(currentlyViewing, id);
-	
-	printf("Currently viewing(setting %lx): %lx - %s\n", (unsigned long)currentlyViewing, (unsigned long)peer, id);
+	if (currentlyViewing != NULL) {
+		getIdObject(currentlyViewing, id);
+		printf("Currently viewing(setting %lx): %lx - %s\n", (unsigned long)currentlyViewing, (unsigned long)peer, id);
+	} else
+		printf("Currently viewing(setting NULL): %lx - none\n", (unsigned long)peer);
 	fflush(stdout);
 	data->currentlyViewing = currentlyViewing;
 }
@@ -438,8 +440,11 @@ static void* getCurrentlyViewingPeer(TPeer *peer){
 
 	TIdObject id;
 
-	getIdObject(data->currentlyViewing, id);
-	printf("Currently viewing(getting %lx): %lx - %s\n", (unsigned long)data->currentlyViewing, (unsigned long)peer, id);
+	if (data->currentlyViewing != NULL) {
+		getIdObject(data->currentlyViewing, id);
+		printf("Currently viewing(getting %lx): %lx - %s\n", (unsigned long)data->currentlyViewing, (unsigned long)peer, id);
+	} else
+		printf("Currently viewing(getting NULL): %lx - none\n", (unsigned long)peer);
 	fflush(stdout);
 
 	return data->currentlyViewing;
