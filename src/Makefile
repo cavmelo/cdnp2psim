@@ -1,7 +1,10 @@
-CFLAGS=-I/usr/include/libxml2 -lxml2 -lm
+CFLAGS=-I/usr/include/libxml2 -lxml2 -lm -g
 
 simulator: *.c *.h
 	gcc *.c $(CFLAGS) -o simulator
 
 run: simulator
-	./simulator > output.txt
+	./simulator
+
+debug: simulator
+	gdb simulator
