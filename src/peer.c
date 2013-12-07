@@ -420,14 +420,7 @@ static void setChannelPeer(TPeer *peer, void *channel){
 //Canal
 static void setCurrentlyViewingPeer(TPeer *peer, void *currentlyViewing){
 	TDataPeer *data = peer->data;
-	TIdObject id;
 
-	if (currentlyViewing != NULL) {
-		getIdObject(currentlyViewing, id);
-		printf("Currently viewing(setting %lx): %lx - %s\n", (unsigned long)currentlyViewing, (unsigned long)peer, id);
-	} else
-		printf("Currently viewing(setting NULL): %lx - none\n", (unsigned long)peer);
-	fflush(stdout);
 	data->currentlyViewing = currentlyViewing;
 }
 
@@ -439,15 +432,6 @@ static void* getChannelPeer(TPeer *peer){
 
 static void* getCurrentlyViewingPeer(TPeer *peer){
 	TDataPeer *data = peer->data;
-
-	TIdObject id;
-
-	if (data->currentlyViewing != NULL) {
-		getIdObject(data->currentlyViewing, id);
-		printf("Currently viewing(getting %lx): %lx - %s\n", (unsigned long)data->currentlyViewing, (unsigned long)peer, id);
-	} else
-		printf("Currently viewing(getting NULL): %lx - none\n", (unsigned long)peer);
-	fflush(stdout);
 
 	return data->currentlyViewing;
 }
