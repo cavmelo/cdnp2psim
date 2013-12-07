@@ -676,7 +676,7 @@ static short canStreamPeer(TPeer* peer, void *object){
 	float bitRate;
 
 	// 1o) Verificar se tem no cache
-	if (!peer->hasCached(peer, object)) 
+	if (!peer->hasCached(peer, object))
 		return 0;
 
 	// 2o) Obter a taxa necessária do vídeo
