@@ -41,6 +41,7 @@ TOngoingDataChannel *createOngoingDataChannel(float rate, int idPeerSrc, int idP
 
 typedef struct _data_channel{
 	float capacity; // Mbps
+	float max_uplink;
 	float rate_uplink; // Mbps
 	float rate_downlink; // Mbps
 	TDictionary *ongoingUL; // opened data channel on UPLink
@@ -53,6 +54,7 @@ static TDataChannel *initDataChannel(float capacity, float rate_uplink){
 	TDataChannel *data = malloc(sizeof(TDataChannel));
 
 	data->capacity =capacity;
+	data->max_uplink = rate_uplink;
 	data->rate_uplink = rate_uplink;
 	data->rate_downlink = capacity - rate_uplink;
 	data->ongoingUL = createDictionary();
@@ -70,6 +72,12 @@ static short canStreamDataChannel(TChannel *channel, float rate){
 	TDataChannel *data = channel->data;
 
 	return data->rate_uplink > rate ? 1 : 0;
+}
+
+static float getULRateChannel(TChannel *channel){
+	TDataChannel *data = channel->data;
+
+	return data->max_uplink - data->rate_uplink;
 }
 
 static short hasDownlinkChannel(TChannel *channel) {
@@ -136,6 +144,7 @@ TChannel *createDataChannel(float capacity, float rate_upload){
 	channel->data = initDataChannel(capacity, rate_upload);
 
 	channel->canStream = canStreamDataChannel;
+	channel->getULRate = getULRateChannel;
 	channel->closeDL = closeDLDataChannel;
 	channel->openDL = openDLDataChannel;
 	channel->closeUL = closeULDataChannel;
