@@ -55,6 +55,7 @@ typedef void (* TOpenDLVideoChannelPeer)(TPeer * peer, unsigned int destId, void
 typedef void (* TCloseULVideoChannelPeer)(TPeer * peer, unsigned int destId);
 typedef int (* TCloseDLVideoChannelPeer)(TPeer * peer, void *video);
 typedef TDictionary *(* TGetOpenULVideoChannelsPeer)(TPeer * peer);
+typedef TDictionary *(* TGetOpenDLVideoChannelsPeer)(TPeer * peer);
 
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
@@ -127,6 +128,7 @@ struct peer {
 		TCloseULVideoChannelPeer closeULVideoChannel;
 		TCloseDLVideoChannelPeer closeDLVideoChannel;
 		TGetOpenULVideoChannelsPeer getOpenULVideoChannels;
+		TGetOpenDLVideoChannelsPeer getOpenDLVideoChannels;
 
 		THasCachedPeer hasCached;
 		TSetTierPeer setTier;

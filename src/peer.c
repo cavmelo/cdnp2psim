@@ -655,6 +655,12 @@ static TDictionary *getOpenULVideoChannelsPeer(TPeer *peer){
 	return data->videosSending;
 }
 
+static TDictionary *getOpenDLVideoChannelsPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->videosReceiving;
+}
+
 static short hasDownlinkPeer(TPeer* peer){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
@@ -791,6 +797,7 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
     p->closeULVideoChannel = closeULVideoChannelPeer;
     p->closeDLVideoChannel = closeDLVideoChannelPeer;
     p->getOpenULVideoChannels = getOpenULVideoChannelsPeer;
+    p->getOpenDLVideoChannels = getOpenDLVideoChannelsPeer;
 
     p->insertCache = insertCachePeer;
     p->updateCache = updateCachePeer;
