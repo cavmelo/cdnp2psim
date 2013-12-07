@@ -82,6 +82,7 @@ typedef void (*TSetProfilePolicyPeer)(TPeer *peer, void* profilePolicy);
 typedef void (*TUpdateRequestsMapQueryPeer)(TPeer *peer, unsigned int idSource, short hops);
 typedef void (*TUpdateHitsMapQueryPeer)(TPeer *peer, unsigned int idSource, short hops);
 typedef void (*TShowMapQueryPeer)(TPeer *peer);
+typedef void (*TShowChannelsInfoPeer)(TPeer* peer);
 
 TPeer* createPeer(unsigned int id, short tier, void *pickDataOnSessionDynamic, void *pickDataOffSessionDynamic, void *pickDataRequest, void *dataSource, void *replicate, void *cache, void *topologyManager, void *channel);
 
@@ -144,6 +145,7 @@ struct peer {
 		TUpdateHitsMapQueryPeer updateHitsMapQuery;
 		TUpdateRequestsMapQueryPeer updateRequestsMapQuery;
 		TShowMapQueryPeer showMapQuery;
+		TShowChannelsInfoPeer showChannelsInfo;
 };
 
 void *createAnderbergContentProfilePeer(void *entry);
