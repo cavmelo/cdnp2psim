@@ -118,6 +118,9 @@ void initSimulator(int simTime, TCommunity** pCommunity, TPriorityQueue** pQueue
 	event = createEvent( 1, SHOW_MAPQUERY, 0);
 	queue->enqueue(queue, event->getTime(event), event);
 
+	event = createEvent( 1, SHOW_CHANNELS, 0);
+	queue->enqueue(queue, event->getTime(event), event);
+
 	*hashTable = createHashTable((int)LENGTH_VIDEO_CATALOG*LOAD_FACTOR_HASH_TABLE + 7);
 
 
@@ -444,6 +447,19 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			queue->enqueue(queue, timeEvent, event);
 
 
+		}else if(typeEvent == SHOW_CHANNELS){
+			printf("Channels(Begin):%lu-----------------------------------------\n",clock);
+			TArrayDynamic *alives = community->getAlivePeer(community);
+			int xi;
+			for(xi=0;xi<community->getNumberOfAlivePeer(community);xi++){
+				TPeer *p = alives->getElement(alives,xi);
+				p->showChannelsInfo(p);
+			}
+
+			printf("Channels(End):%lu---------------------------------------------------\n",clock);
+			timeEvent = clock + SimTime*0.05;
+			event  = createEvent((TTimeEvent) timeEvent, SHOW_CHANNELS, (TOwnerEvent)idPeer);
+			queue->enqueue(queue, timeEvent, event);
 		}else if (typeEvent == LEAVE){ // change it with U need a model without churn
 			// change the peer status to DOWN
 			peer->setStatus(peer, DOWN_PEER);
