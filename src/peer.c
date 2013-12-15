@@ -776,6 +776,19 @@ static void showChannelsInfoPeer(TPeer* peer){
 				printf("\t%d\n", *clientId);
 		}
 	}
+
+ 	iterator = createIteratorDictionary(videosReceiving);
+	iterator->reset(iterator);
+
+	if (iterator->has(iterator)) {
+		printf("Peer %d is receiving (total of %f Kbps) from\n", peerId, data->channel->getDLRate(data->channel));
+
+		for (; iterator->has(iterator); iterator->next(iterator)) {
+			serverId = (unsigned int*)iterator->current(iterator);
+			if (serverId != NULL)
+				printf("\t%d\n", *serverId);
+		}
+	}
 }
 
 TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topo, void *channel){
