@@ -189,7 +189,7 @@ void prefetch(TPeer* peer, unsigned int idPeer, THashTable* hashTable, TCommunit
 	dataSource = peer->getDataSource(peer);
 	video = dataSource->pickForPrefetch(dataSource);
 
-	if (video == NULL && peer->hasDownlink(peer))
+	if (video == NULL || !peer->hasDownlink(peer))
 		return;
 
 	serverPeer = community->searching(community,peer,video,idPeer);
