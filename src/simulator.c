@@ -177,6 +177,43 @@ void processTopologySimulator(unsigned int idPeer, THashTable* hashTable, TCommu
 	}
 }
 
+void prefetch(TPeer* peer, unsigned int idPeer, THashTable* hashTable, TCommunity* community, TSystemInfo* systemData){
+	TObject* video;
+	TIdObject idVideo;
+	TListObject *listEvicted;
+	TPeer* serverPeer;
+	TDataSource* dataSource;
+	TItemHashTable *item;
+	unsigned int idServerPeer;
+
+	dataSource = peer->getDataSource(peer);
+	video = dataSource->pickForPrefetch(dataSource);
+
+	if (video == NULL && peer->hasDownlink(peer))
+		return;
+
+	serverPeer = community->searching(community,peer,video,idPeer);
+
+	if ( serverPeer != NULL && serverPeer != peer ){
+		idServerPeer = serverPeer->getId(serverPeer);
+		serverPeer->openULVideoChannel(serverPeer, idPeer, video);
+		peer->openDLVideoChannel(peer, idServerPeer, video);
+
+		if ( peer->insertCache( peer, video, systemData ) ){
+			getIdObject(video, idVideo);
+
+			item = createItemHashTable();
+			item->set(item, idPeer, peer, idVideo, video);
+			hashTable->insert(hashTable, item);
+			item->dispose(item);
+
+			// updating hash table due to evicting that made room for the cached video
+			listEvicted = peer->getEvictedCache(peer);
+			hashTable->removeEvictedItens(hashTable, idPeer, listEvicted);
+		}
+	}
+}
+
 // Process Request from peers
 int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommunity* community, TSystemInfo* systemData){
 
@@ -197,7 +234,7 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 	//set video that the peer is currently viewing
 	peer->setCurrentlyViewing(peer, video);
 
-	serverPeer = community->searching(community,peer,video);
+	serverPeer = community->searching(community,peer,video,idPeer);
 
 	videoLength = getLengthObject(video);
 
@@ -242,6 +279,8 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 		}
 	}
 
+	prefetch(peer, idPeer, hashTable, community, systemData);
+
 	return videoLength;
 }
 
@@ -266,8 +305,40 @@ void processFinishedViewingSimulator(TPeer *peer, TCommunity* community){
 	}
 
 	peer->setCurrentlyViewing(peer, NULL);
+	closeAllPeerOpenDLVideoChannelsSimulator(peer, community);
 
 	//free(currentlyViewing);
+}
+
+void closeAllPeerOpenDLVideoChannelsSimulator(TPeer *client, TCommunity *community){
+	TDictionary *connectedServers;
+	TDictionary *downloadingVideos;
+	TPeer *server;
+	TKeyDictionary key;
+	TObject *video;
+	unsigned int clientId;
+	unsigned int *serverId;
+
+	clientId = client->getId(client);
+
+	connectedServers = client->getOpenDLVideoChannels(client);
+	downloadingVideos = client->getOpenDLVideos(client);
+
+	key = connectedServers->firstKey(connectedServers);
+	serverId = connectedServers->retrieval(connectedServers, key);
+
+	while(serverId != NULL){
+		server = community->getPeer(community, *serverId);
+		video = downloadingVideos->retrieval(downloadingVideos, key);
+
+		client->showChannelsInfo(client);
+		server->showChannelsInfo(server);
+		client->closeDLVideoChannel(client, video);
+		server->closeULVideoChannel(server, clientId);
+
+		key = connectedServers->firstKey(connectedServers);
+		serverId = connectedServers->retrieval(connectedServers, key);
+	}
 }
 
 void closeAllPeerOpenULVideoChannelsSimulator(TPeer *server, TCommunity *community){
@@ -275,6 +346,7 @@ void closeAllPeerOpenULVideoChannelsSimulator(TPeer *server, TCommunity *communi
 	TPeer *client;
 	TObject *video;
 	unsigned int *clientId;
+	unsigned int serverId = server->getId(server);
 
 	connectedClients = server->getOpenULVideoChannels(server);
 
@@ -282,7 +354,7 @@ void closeAllPeerOpenULVideoChannelsSimulator(TPeer *server, TCommunity *communi
 
 	while(clientId != NULL){
 		client = community->getPeer(community, *clientId);
-		video = client->getCurrentlyViewing(client);
+		video = client->getVideoReceivingFrom(client, serverId);
 
 		if (video == NULL) {
 			printf("Video is NULL\n");
@@ -467,6 +539,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			// Interrompe visualização do vídeo
 			processFinishedViewingSimulator(peer, community);
 			closeAllPeerOpenULVideoChannelsSimulator(peer, community);
+			closeAllPeerOpenDLVideoChannelsSimulator(peer, community);
 
 			processTopologySimulator(idPeer, hashTable, community, sysInfo);
 

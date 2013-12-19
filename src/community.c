@@ -770,14 +770,14 @@ static int getNumberOfAlivePeerCommunity(TCommunity *community){
 	return alive->getOccupancy(alive);
 }
 
-static void* searchingCommunity(TCommunity *community, void *vpeer, void *object){
+static void* searchingCommunity(TCommunity *community, void *vpeer, void *object, unsigned int clientId){
 	TDataCommunity *data = community->data;
 	TPeer *peer = vpeer;
 	int tierPeer = peer->getTier(peer);
 
 	TSearch *search = data->tiers->tier[tierPeer-1].searching;
 
-	return search->run(search,peer,object);
+	return search->run(search,peer,object,clientId);
 
 }
 

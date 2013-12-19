@@ -1,3 +1,4 @@
+#include "object.h"
 #include "dictionary.h"
 
 //stats related definition
@@ -50,17 +51,19 @@ typedef short (* TIsUpPeer)(TPeer* peer);
 typedef short (* TIsDownPeer)(TPeer* peer);
 typedef short (* THasDownlinkPeer)(TPeer *peer);
 
-typedef void (* TOpenULVideoChannelPeer)(TPeer * peer, unsigned int destId, void *video);
-typedef void (* TOpenDLVideoChannelPeer)(TPeer * peer, unsigned int destId, void *video);
+typedef void (* TOpenULVideoChannelPeer)(TPeer * peer, unsigned int destId, TObject *video);
+typedef void (* TOpenDLVideoChannelPeer)(TPeer * peer, unsigned int destId, TObject *video);
 typedef void (* TCloseULVideoChannelPeer)(TPeer * peer, unsigned int destId);
-typedef int (* TCloseDLVideoChannelPeer)(TPeer * peer, void *video);
+typedef int (* TCloseDLVideoChannelPeer)(TPeer * peer, TObject *video);
 typedef TDictionary *(* TGetOpenULVideoChannelsPeer)(TPeer * peer);
 typedef TDictionary *(* TGetOpenDLVideoChannelsPeer)(TPeer * peer);
+typedef TDictionary *(* TGetOpenDLVideosPeer)(TPeer * peer);
+typedef TObject *(* TGetVideoReceivingFromPeer)(TPeer * peer, int serverId);
 
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
 typedef void (* TSetTopologyManagerPeer)(TPeer *peer, void* tm);
-typedef short (* TCanStreamPeer)(TPeer *peer, void *video);
+typedef short (* TCanStreamPeer)(TPeer *peer, void *video, unsigned int clientId);
 
 //Canal
 typedef void *(* TGetChannelPeer)(TPeer *peer);
@@ -130,6 +133,8 @@ struct peer {
 		TCloseDLVideoChannelPeer closeDLVideoChannel;
 		TGetOpenULVideoChannelsPeer getOpenULVideoChannels;
 		TGetOpenDLVideoChannelsPeer getOpenDLVideoChannels;
+		TGetOpenDLVideosPeer getOpenDLVideos;
+		TGetVideoReceivingFromPeer getVideoReceivingFrom;
 
 		THasCachedPeer hasCached;
 		TSetTierPeer setTier;

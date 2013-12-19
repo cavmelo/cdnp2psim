@@ -51,6 +51,7 @@ void disposeLogDataSource(TLogDataSource *log);
 //data Source related definitions
 typedef struct datasource TDataSource;
 typedef void* (* TPickDataSource)(TDataSource *);
+typedef void* (* TPickForPrefetchDataSource)(TDataSource *);
 typedef void (* TResetDataSource)(TDataSource *);
 typedef int (* TSizeDataSource)(TDataSource *);
 typedef int (* TDurationDataSource)(TDataSource *);
@@ -61,6 +62,7 @@ struct datasource{
 
 	// public methos
 	TPickDataSource pick;
+	TPickForPrefetchDataSource pickForPrefetch;
 	TResetDataSource reset;
 	TSizeDataSource size;
 	TDurationDataSource duration;
