@@ -610,6 +610,9 @@ static int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
 	unsigned int *content;
 	unsigned int destId;
 
+	if (data->currentlyViewing == video)
+		data->currentlyViewing = NULL;
+
 	getIdObject(video, idVideo);
 	key = dv->keyGenesis(idVideo);
 	dv->remove(dv,key);

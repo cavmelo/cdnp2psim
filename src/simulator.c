@@ -364,8 +364,6 @@ void closeAllPeerOpenULVideoChannelsSimulator(TPeer *server, TCommunity *communi
 		client->closeDLVideoChannel(client, video);
 		server->closeULVideoChannel(server, *clientId);
 
-		client->setCurrentlyViewing(client, NULL);
-
 		clientId = connectedClients->first(connectedClients);
 	}
 }
