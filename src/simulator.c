@@ -199,7 +199,7 @@ void prefetch(TPeer* peer, unsigned int idPeer, THashTable* hashTable, TCommunit
 		serverPeer->openULVideoChannel(serverPeer, idPeer, video);
 		peer->openDLVideoChannel(peer, idServerPeer, video);
 
-		if ( peer->insertCache( peer, video, systemData ) ){
+		if ( peer->insertCache( peer, cloneObject(video), systemData ) ){
 			getIdObject(video, idVideo);
 
 			item = createItemHashTable();
@@ -248,23 +248,24 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 		hashTable->removeEvictedItens(hashTable, idPeer, listEvicted);
 
 		//Looking UP peers into keepers
-	}else if ( serverPeer != NULL ){
-
-		idServerPeer = serverPeer->getId(serverPeer);
-		serverPeer->updateCacheAsServer(serverPeer,video,systemData);
-
-		// updating hash table due to possible eviction that made room for the cached video
-		listEvicted = serverPeer->getEvictedCache(serverPeer);
-		hashTable->removeEvictedItens(hashTable, idServerPeer, listEvicted);
-
-		// Estabelecer canal de dados
-		serverPeer->openULVideoChannel(serverPeer, idPeer, video);
-		peer->openDLVideoChannel(peer, idServerPeer, video);
 	}else{
+		getIdObject(video, idVideo);
+		if ( serverPeer != NULL ){
+			idServerPeer = serverPeer->getId(serverPeer);
+			serverPeer->updateCacheAsServer(serverPeer,video,systemData);
+
+			// updating hash table due to possible eviction that made room for the cached video
+			listEvicted = serverPeer->getEvictedCache(serverPeer);
+			hashTable->removeEvictedItens(hashTable, idServerPeer, listEvicted);
+
+			printf("Comecar a assistir: %d %s\n", idPeer, idVideo);
+			// Estabelecer canal de dados
+			serverPeer->openULVideoChannel(serverPeer, idPeer, video);
+			peer->openDLVideoChannel(peer, idServerPeer, video);
+		}
 
 		//try to insert missed video
-		if ( peer->insertCache( peer, video, systemData ) ){
-
+		if ( peer->insertCache( peer, cloneObject(video), systemData ) ){
 			getIdObject(video, idVideo);
 
 			item = createItemHashTable();
