@@ -60,7 +60,7 @@ static void* nextPlaylist(TPlaylist *pl) {
 }
 
 static void* nextPrefetchPlaylist(TPlaylist *pl) {
-	struct _data_playlist*data = pl->data;
+	struct _data_playlist* data = pl->data;
 
 	if (data->prefetchNext + 1 == data->length)
 		return NULL ;
