@@ -5,6 +5,7 @@
  *      Author: cesar
  */
 #include "stdlib.h"
+#include "stdio.h"
 #include "dictionary.h"
 #include "internals.h"
 
@@ -72,8 +73,11 @@ static TDataChannel *initDataChannel(float capacity, float rate_uplink, float pr
 
 enum {UPLINK = 1, DOWNLINK=2, UNDEFINED=3};
 
-static short canStreamDataChannel(TChannel *channel, float rate){
+static short canStreamDataChannel(TChannel *channel, float rate, int prefetch){
 	TDataChannel *data = channel->data;
+
+	if (prefetch)
+		rate *= 1.f + data->prefetchDownlinkRatePercent;
 
 	return data->rate_uplink > rate ? 1 : 0;
 }
@@ -90,10 +94,13 @@ static float getDLRateChannel(TChannel *channel){
 	return data->max_downlink - data->rate_downlink;
 }
 
-static short hasDownlinkChannel(TChannel *channel) {
+static short hasDownlinkChannel(TChannel *channel, float bitRate, int prefetch) {
 	TDataChannel *data = channel->data;
 
-	return data->rate_downlink > 0 ? 1 : 0;
+	if (prefetch)
+		bitRate *= 1 + data->prefetchDownlinkRatePercent;
+
+	return data->rate_downlink >= bitRate ? 1 : 0;
 }
 
 static void closeDLDataChannel(TChannel *channel, unsigned int idPeerDst){

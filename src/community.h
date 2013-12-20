@@ -27,7 +27,7 @@ typedef void (* TUnsetAlivePeerCommunity)(TCommunity *community, unsigned int id
 typedef void* (* TGetAlivePeerCommunity)(TCommunity *community);
 typedef int (* TGetNumberOfAlivePeerCommunity)(TCommunity *community);
 typedef void (* TDisposeCommunity)(TCommunity* community);
-typedef void* (* TSearchingCommunity)(TCommunity* community, void *peer, void *object, unsigned int clientId);
+typedef void* (* TSearchingCommunity)(TCommunity* community, void *peer, void *object, unsigned int clientId, int prefetch);
 
 struct community{
 	void *data;

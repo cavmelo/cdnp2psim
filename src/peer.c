@@ -560,7 +560,7 @@ static short isDownPeer(TPeer* peer){
 	return (data->status == DOWN_PEER);
 }
 
-static void openULVideoChannelPeer(TPeer * peer, unsigned int destId, TObject *video){
+static void openULVideoChannelPeer(TPeer * peer, unsigned int destId, TObject *video, int prefetch){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
 	TDictionary *d = data->videosSending;
@@ -572,10 +572,10 @@ static void openULVideoChannelPeer(TPeer * peer, unsigned int destId, TObject *v
 	*content = destId;
 	d->insert(d, destId, content);
 
-	channel->openUL(channel, data->id, destId, bitRate);
+	channel->openUL(channel, data->id, destId, bitRate, prefetch);
 }
 
-static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *video){
+static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *video, int prefetch){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
 	TDictionary *dc = data->channelsReceiving;
@@ -597,7 +597,7 @@ static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *vi
 
 	dc->insert(dc, key, content );
 
-	channel->openDL(channel, data->id, destId, bitRate);
+	channel->openDL(channel, data->id, destId, bitRate, prefetch);
 }
 
 static int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
@@ -688,10 +688,12 @@ static TObject* getVideoReceivingFromPeer(TPeer *peer, int serverId){
 	return NULL;
 }
 
-static short hasDownlinkPeer(TPeer* peer){
+static short hasDownlinkPeer(TPeer* peer, TObject *video,  int prefetch){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
-	return channel->hasDownlink(channel);
+	float bitRate = getBitRateObject(video);
+
+	return channel->hasDownlink(channel, bitRate, prefetch);
 }
 
 static short hasCachedPeer(TPeer* peer, void *object){
@@ -702,7 +704,7 @@ static short hasCachedPeer(TPeer* peer, void *object){
 	//return (data->status == DOWN_PEER);
 }
 
-static short canStreamPeer(TPeer* peer, void *object, unsigned int clientId){
+static short canStreamPeer(TPeer* peer, void *object, unsigned int clientId, int prefetch){
 	TDataPeer *data = peer->data;
 	TCache *cache = data->cache;
 	TChannel *channel = data->channel;
@@ -726,7 +728,7 @@ static short canStreamPeer(TPeer* peer, void *object, unsigned int clientId){
 		
 	// 3o) Chamar channel->canStream com essa taxa
 	// para verificar se tem taxa de uplink disponívels
-	return channel->canStream(channel, bitRate);
+	return channel->canStream(channel, bitRate, prefetch);
 }
 
 static void* getProfilePeer(TPeer* peer){

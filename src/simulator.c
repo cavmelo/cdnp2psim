@@ -189,18 +189,19 @@ void prefetch(TPeer* peer, unsigned int idPeer, THashTable* hashTable, TCommunit
 	dataSource = peer->getDataSource(peer);
 	video = dataSource->pickForPrefetch(dataSource);
 
-	if (video == NULL || !peer->hasDownlink(peer))
+	if (video == NULL || !peer->hasDownlink(peer, video, 1))
 		return;
 
-	serverPeer = community->searching(community,peer,video,idPeer);
+	serverPeer = community->searching(community,peer,video,idPeer, 1);
 
 	if ( serverPeer != NULL && serverPeer != peer ){
+			getIdObject(video, idVideo);
 		idServerPeer = serverPeer->getId(serverPeer);
-		serverPeer->openULVideoChannel(serverPeer, idPeer, video);
-		peer->openDLVideoChannel(peer, idServerPeer, video);
+		printf("Comecar prefetch de %s: %d <- %d\n", idVideo, idPeer, idServerPeer);
+		serverPeer->openULVideoChannel(serverPeer, idPeer, video, 1);
+		peer->openDLVideoChannel(peer, idServerPeer, video, 1);
 
 		if ( peer->insertCache( peer, cloneObject(video), systemData ) ){
-			getIdObject(video, idVideo);
 
 			item = createItemHashTable();
 			item->set(item, idPeer, peer, idVideo, video);
@@ -234,7 +235,7 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 	//set video that the peer is currently viewing
 	peer->setCurrentlyViewing(peer, video);
 
-	serverPeer = community->searching(community,peer,video,idPeer);
+	serverPeer = community->searching(community,peer,video,idPeer, 0);
 
 	videoLength = getLengthObject(video);
 
@@ -246,6 +247,7 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 		peer->updateCache(peer, video, systemData);
 		listEvicted = peer->getEvictedCache(peer);
 		hashTable->removeEvictedItens(hashTable, idPeer, listEvicted);
+			printf("Comecar a assistir da cache: %d %s\n", idPeer, idVideo);
 
 		//Looking UP peers into keepers
 	}else{
@@ -260,9 +262,10 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 
 			printf("Comecar a assistir: %d %s\n", idPeer, idVideo);
 			// Estabelecer canal de dados
-			serverPeer->openULVideoChannel(serverPeer, idPeer, video);
-			peer->openDLVideoChannel(peer, idServerPeer, video);
-		}
+			serverPeer->openULVideoChannel(serverPeer, idPeer, video, 0);
+			peer->openDLVideoChannel(peer, idServerPeer, video, 0);
+		} else
+			printf("Comecar a assistir do CDN: %d %s\n", idPeer, idVideo);
 
 		//try to insert missed video
 		if ( peer->insertCache( peer, cloneObject(video), systemData ) ){
@@ -554,7 +557,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			// Update DOWN time Stats
 			addDownTimeStatsPeer( peer->getOnStats(peer), (timeEvent>SimTime?(SimTime-clock):(timeEvent-clock)));
 
-		}else if( (typeEvent == REQUEST) && (peer->isUp(peer)) && (peer->hasDownlink(peer))){
+		}else if( (typeEvent == REQUEST) && (peer->isUp(peer))){
 			//Processing Request event
 			videoLength = processRequestSimulator(idPeer, hashTable, community, sysInfo);
 
