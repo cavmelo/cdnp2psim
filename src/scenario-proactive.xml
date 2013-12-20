@@ -29,6 +29,7 @@
 			<channel>	
 				<parameter name="capacity">768</parameter>
 				<parameter name="rateUplink">512</parameter>
+				<parameter name="prefetchDownlinkRatePercent">0.3</parameter>
 
 			</channel>		
 			<churn>
@@ -97,6 +98,7 @@
 			<channel>	
 				<parameter name="capacity">768</parameter>
 				<parameter name="rateUplink">512</parameter>
+				<parameter name="prefetchDownlinkRatePercent">0.3</parameter>
 
 			</channel>		
 			<churn>

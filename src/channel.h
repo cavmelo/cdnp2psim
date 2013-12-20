@@ -1,6 +1,6 @@
 typedef struct channel TChannel;
 
-TChannel *createDataChannel(float capacity, float rate_upload);
+TChannel *createDataChannel(float capacity, float rate_upload, float percentDownlinkRatePercent);
 
 typedef  short (* TCanStreamDataChannel )(TChannel *, float rate);
 typedef  float (* TGetULRate )(TChannel *);

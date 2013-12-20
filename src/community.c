@@ -327,13 +327,14 @@ static void* setupSearchingCommunity(int id, xmlDocPtr doc, TSymTable *searching
 //Setup Canal
 static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc){
 	char xpath[1000]={[0]='\0'};
-	char *xCapacity=NULL, *xRateUplink=NULL;
+	char *xCapacity=NULL, *xRateUplink=NULL, *xPrefetchDownlinkRatePercent=NULL;
 	char pars[1000]={[0]='\0'}, *parameter=NULL, *value=NULL;
 	char entry[1000]={[0]='\0'};
 	char *separator = ";";
 	char *last=NULL;
 	float capacity;
 	float rateUplink;
+	float prefetchDownlinkRatePercent;
 	TChannel *channel;
 
 	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"capacity\"]",id+1);
@@ -346,7 +347,12 @@ static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc){
 	rateUplink = atof((char*)xRateUplink);
 	free(xRateUplink);
 
-	channel = createDataChannel(capacity, rateUplink);
+	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"prefetchDownlinkRatePercent\"]",id+1);
+	xPrefetchDownlinkRatePercent = xgetOneParameter(doc, xpath);
+	prefetchDownlinkRatePercent = atof((char*)xPrefetchDownlinkRatePercent);
+	free(xPrefetchDownlinkRatePercent);
+
+	channel = createDataChannel(capacity, rateUplink, prefetchDownlinkRatePercent);
 	peer->setChannel(peer,channel);
 }
 

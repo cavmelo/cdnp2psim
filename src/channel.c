@@ -45,13 +45,14 @@ typedef struct _data_channel{
 	float max_downlink;
 	float rate_uplink; // Mbps
 	float rate_downlink; // Mbps
+	float prefetchDownlinkRatePercent; //Percent: 0 to 1
 	TDictionary *ongoingUL; // opened data channel on UPLink
 	TDictionary *ongoingDL; // opened data channel on DOWNLink
 
 } TDataChannel;
 
 
-static TDataChannel *initDataChannel(float capacity, float rate_uplink){
+static TDataChannel *initDataChannel(float capacity, float rate_uplink, float prefetchDownlinkRatePercent){
 	TDataChannel *data = malloc(sizeof(TDataChannel));
 
 	data->capacity =capacity;
@@ -59,6 +60,7 @@ static TDataChannel *initDataChannel(float capacity, float rate_uplink){
 	data->max_downlink = capacity - rate_uplink;
 	data->rate_uplink = rate_uplink;
 	data->rate_downlink = data->max_downlink;
+	data->prefetchDownlinkRatePercent = prefetchDownlinkRatePercent;
 	data->ongoingUL = createDictionary();
 	data->ongoingDL = createDictionary();
 	return data;
@@ -116,40 +118,55 @@ static void closeULDataChannel(TChannel *channel, unsigned int idPeerDst){
 	free(ongoingDC);
 }
 
-static short openULDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb){
+static short openULDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb, int prefetch){
 	TDataChannel *data = channel->data;
 	short opened = 0; // status of requested data channel
+
+	if (prefetch)
+		eb *= 1.f + data->prefetchDownlinkRatePercent;
 
 	if (data->rate_uplink >= eb){
 		TOngoingDataChannel *ongDC = createOngoingDataChannel(eb, idPeerSrc, idPeerDst);
 		data->ongoingUL->insert(data->ongoingUL, idPeerDst, ongDC);
 		data->rate_uplink -= eb;
 		opened = 1; // true
+	}else{
+		printf("Failed to open UL channel!\n");
+		printf("eb: %f, rate_uplink: %f\n", eb, data->rate_uplink);
+		fflush(stdout);
 	}
 
 	return opened;
 }
 
 
-static short openDLDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb){
+static short openDLDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb, int prefetch){
 	TDataChannel *data = channel->data;
 	short opened=0; // status of requested data channel
+
+	if (prefetch)
+		eb *= 1.f + data->prefetchDownlinkRatePercent;
 
 	if( (data->rate_downlink>= eb) ){
 		TOngoingDataChannel *ongoingDC = createOngoingDataChannel(eb, idPeerSrc, idPeerDst);
 		data->ongoingDL->insert(data->ongoingDL, idPeerDst, ongoingDC);
 		data->rate_downlink -= eb;
 		opened = 1; // true
+	}else{
+		printf("Failed to open DL channel!\n");
+		printf("eb: %f, rate_downlink: %f\n", eb, data->rate_downlink);
+		fflush(stdout);
 	}
+
 	return opened;
 }
 
 
-TChannel *createDataChannel(float capacity, float rate_upload){
+TChannel *createDataChannel(float capacity, float rate_upload, float prefetchDownlinkRatePercent){
 
 	TChannel *channel = malloc(sizeof(TChannel));
 
-	channel->data = initDataChannel(capacity, rate_upload);
+	channel->data = initDataChannel(capacity, rate_upload, prefetchDownlinkRatePercent);
 
 	channel->canStream = canStreamDataChannel;
 	channel->getULRate = getULRateChannel;
