@@ -801,9 +801,10 @@ static void showChannelsInfoPeer(TPeer* peer){
 	TObject * currentlyViewing = peer->getCurrentlyViewing(peer);
 	TIdObject idVideo;
 
+	TKeyDictionary key;
 	TDictionary* channelsReceiving = peer->getOpenDLVideoChannels(peer);
 	unsigned int* clientId;
-	unsigned int* serverId = (unsigned int*)channelsReceiving->first(channelsReceiving);
+	unsigned int* serverId;
 	TDictionary* videosSending = peer->getOpenULVideoChannels(peer);
 	TIterator *iterator;
 
@@ -815,8 +816,13 @@ static void showChannelsInfoPeer(TPeer* peer){
 		getIdObject(currentlyViewing, idVideo);
 		bitRate = getBitRateObject(currentlyViewing);
 
+		key = channelsReceiving->keyGenesis(idVideo);
+		serverId = channelsReceiving->retrieval(channelsReceiving, key);
+
 		if (serverId != NULL)
 			printf("Peer %d is viewing %s (%f Kbps) from %d\n", peerId, idVideo, bitRate, *serverId);
+		else
+			printf("Peer %d is viewing %s (%f Kbps) from cache or CDN\n", peerId, idVideo, bitRate);
 	}
 
 	iterator = createIteratorDictionary(videosSending);
