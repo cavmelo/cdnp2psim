@@ -642,7 +642,7 @@ int main(int argc, char **argv){
 	unsigned int simTime, warmupTime, scale;
 
 
-	simTime = (int)(1.5f*(float)*YEARS_TO_SECONDS);
+	simTime = (int)(1.5f*(float)YEARS_TO_SECONDS);
 	warmupTime = 8*HOURS_TO_SECONDS;
 	scale = HOURS_TO_SECONDS;
 
