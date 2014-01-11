@@ -16,6 +16,7 @@
 #include "topology.h"
 #include "community.h"
 #include "search.h"
+#include "channel.h"
 
 #define LENGTH_VIDEO_CATALOG 413524
 
@@ -194,6 +195,14 @@ void prefetch(TPeer* peer, unsigned int idPeer, THashTable* hashTable, TCommunit
 	TDataSource* dataSource;
 	TItemHashTable *item;
 	unsigned int idServerPeer;
+	TChannel* channel;
+	float prefetchDownlinkRatePercent;
+
+	channel = peer->getChannel(peer);
+	prefetchDownlinkRatePercent = channel->getPrefetchDownlinkRatePercent(channel);
+
+	if (prefetchDownlinkRatePercent == 0.f)
+		return;
 
 	dataSource = peer->getDataSource(peer);
 	video = dataSource->pickForPrefetch(dataSource);

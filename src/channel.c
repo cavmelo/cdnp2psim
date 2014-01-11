@@ -94,6 +94,12 @@ static float getDLRateChannel(TChannel *channel){
 	return data->max_downlink - data->rate_downlink;
 }
 
+static float getPrefetchDownlinkRatePercentChannel(TChannel *channel){
+	TDataChannel *data = channel->data;
+
+	return data->prefetchDownlinkRatePercent;
+}
+
 static short hasDownlinkChannel(TChannel *channel, float bitRate, int prefetch) {
 	TDataChannel *data = channel->data;
 
@@ -178,6 +184,7 @@ TChannel *createDataChannel(float capacity, float rate_upload, float prefetchDow
 	channel->canStream = canStreamDataChannel;
 	channel->getULRate = getULRateChannel;
 	channel->getDLRate = getDLRateChannel;
+	channel->getPrefetchDownlinkRatePercent = getPrefetchDownlinkRatePercentChannel;
 	channel->closeDL = closeDLDataChannel;
 	channel->openDL = openDLDataChannel;
 	channel->closeUL = closeULDataChannel;
