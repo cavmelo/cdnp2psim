@@ -23,6 +23,7 @@
 #define HOURS_TO_SECONDS	60*MINUTES_TO_SECONDS
 #define DAYS_TO_SECONDS		24*HOURS_TO_SECONDS
 #define WEEKS_TO_SECONDS	7*DAYS_TO_SECONDS
+#define YEARS_TO_SECONDS	365*DAYS_TO_SECONDS
 
 //extreme replication control policy
 //
@@ -120,14 +121,14 @@ void initSimulator(int simTime, TCommunity** pCommunity, TPriorityQueue** pQueue
 
 	}
 
-	event = createEvent( 1, SHOW_TOPOLOGY, 0);
-	queue->enqueue(queue, event->getTime(event), event);
+//	event = createEvent( 1, SHOW_TOPOLOGY, 0);
+//	queue->enqueue(queue, event->getTime(event), event);
 
-	event = createEvent( 1, SHOW_MAPQUERY, 0);
-	queue->enqueue(queue, event->getTime(event), event);
+//	event = createEvent( 1, SHOW_MAPQUERY, 0);
+//	queue->enqueue(queue, event->getTime(event), event);
 
-	event = createEvent( 1, SHOW_CHANNELS, 0);
-	queue->enqueue(queue, event->getTime(event), event);
+//	event = createEvent( 1, SHOW_CHANNELS, 0);
+//	queue->enqueue(queue, event->getTime(event), event);
 
 	*hashTable = createHashTable((int)LENGTH_VIDEO_CATALOG*LOAD_FACTOR_HASH_TABLE + 7);
 
@@ -205,7 +206,7 @@ void prefetch(TPeer* peer, unsigned int idPeer, THashTable* hashTable, TCommunit
 	if ( serverPeer != NULL && serverPeer != peer ){
 			getIdObject(video, idVideo);
 		idServerPeer = serverPeer->getId(serverPeer);
-		printf("Comecar prefetch de %s: %d <- %d\n", idVideo, idPeer, idServerPeer);
+		//printf("Comecar prefetch de %s: %d <- %d\n", idVideo, idPeer, idServerPeer);
 		serverPeer->openULVideoChannel(serverPeer, idPeer, video, 1);
 		peer->openDLVideoChannel(peer, idServerPeer, video, 1);
 
@@ -255,7 +256,8 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 		peer->updateCache(peer, video, systemData);
 		listEvicted = peer->getEvictedCache(peer);
 		hashTable->removeEvictedItens(hashTable, idPeer, listEvicted);
-			printf("Comecar a assistir da cache: %d %s\n", idPeer, idVideo);
+		getIdObject(video, idVideo);
+			//printf("Comecar a assistir da cache: %d %s\n", idPeer, idVideo);
 
 		//Looking UP peers into keepers
 	}else{
@@ -268,12 +270,12 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 			listEvicted = serverPeer->getEvictedCache(serverPeer);
 			hashTable->removeEvictedItens(hashTable, idServerPeer, listEvicted);
 
-			printf("Comecar a assistir: %d %s\n", idPeer, idVideo);
+			//printf("Comecar a assistir: %d %s\n", idPeer, idVideo);
 			// Estabelecer canal de dados
 			serverPeer->openULVideoChannel(serverPeer, idPeer, video, 0);
 			peer->openDLVideoChannel(peer, idServerPeer, video, 0);
 		} else
-			printf("Comecar a assistir do CDN: %d %s\n", idPeer, idVideo);
+			//printf("Comecar a assistir do CDN: %d %s\n", idPeer, idVideo);
 
 		//try to insert missed video
 		if ( peer->insertCache( peer, cloneObject(video), systemData ) ){
@@ -640,7 +642,7 @@ int main(int argc, char **argv){
 	unsigned int simTime, warmupTime, scale;
 
 
-	simTime = 1*DAYS_TO_SECONDS;
+	simTime = (int)(1.5f*(float)*YEARS_TO_SECONDS);
 	warmupTime = 8*HOURS_TO_SECONDS;
 	scale = HOURS_TO_SECONDS;
 
