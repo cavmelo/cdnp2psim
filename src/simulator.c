@@ -1,3 +1,4 @@
+#include "time.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -394,9 +395,21 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 	int peersUp;
 	int k=1;
 	short int first_time = 1;
+	int bla = 0;
+	int blaTime = 0;
+	int lastTime = time(NULL);
+	int eventCount = 0;
+	int joinCount = 0;
+	int leaveCount = 0;
+	int watchCount = 0;
+	int finishCount = 0;
+	int topologyCount = 0;
+	int wtfCount = 0;
+		fprintf(stderr, "Sim time: %d\n", SimTime);
 
 	while ( clock < SimTime ){
 		event = queue->dequeue(queue);
+		eventCount++;
 		if (!event){
 			fprintf(stderr,"ERROR: simulator.c: run out of events\n");
 			exit(0);
@@ -411,6 +424,20 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 		peer = community->getPeer(community, idPeer);
 
 		sysInfo->setTime(sysInfo, clock);
+
+		if (clock > bla*DAYS_TO_SECONDS){
+		blaTime = time(NULL);
+		fprintf(stderr, "%ld\tDay time: %d\tEvents: %d\tJoins: %d\tLeaves: %d\tWatches: %d\tFinishes: %d\tTopologies: %d\n", clock, blaTime - lastTime, eventCount, joinCount, leaveCount, watchCount, finishCount, topologyCount, wtfCount);
+		lastTime = blaTime;
+		eventCount = 0;
+		joinCount = 0;
+		leaveCount = 0;
+		watchCount = 0;
+		finishCount = 0;
+		topologyCount = 0;
+		wtfCount = 0;
+		bla++;
+		}
 
 		if (clock > k*scale){
 			if (clock > warmupTime){
@@ -443,6 +470,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 
 		if (typeEvent == JOIN){
 
+			joinCount++;
 			//extreme replicated data control by setting Num. Max Of Replica
 			//poisonCacheReplicationPolicy(idPeer, hashTable, community);
 
@@ -473,7 +501,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 //			queue->enqueue(queue, timeEvent, event);
 
 		}else if(typeEvent == TOPOLOGY){
-
+			topologyCount++;
 			short status = peer->getStatus(peer);
 			processTopologySimulator(idPeer, hashTable, community, sysInfo);
 
@@ -538,6 +566,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			queue->enqueue(queue, timeEvent, event);
 		}else if (typeEvent == LEAVE){ // change it with U need a model without churn
 			// change the peer status to DOWN
+			leaveCount++;
 			peer->setStatus(peer, DOWN_PEER);
 
 			// Interrompe visualização do vídeo
@@ -561,6 +590,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 
 		}else if( (typeEvent == REQUEST) && (peer->isUp(peer))){
 			//Processing Request event
+			watchCount++;
 			videoLength = processRequestSimulator(idPeer, hashTable, community, sysInfo);
 
 			// Queue a FINISHED_VIEWING event after the duration of the video
@@ -568,6 +598,7 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			event  = createEvent((TTimeEvent) timeEvent, FINISHED_VIEWING, (TOwnerEvent)idPeer);
 			queue->enqueue(queue, timeEvent, event);
 		}else if( (typeEvent == FINISHED_VIEWING) && peer->isUp(peer)){
+			finishCount++;
 			processFinishedViewingSimulator(peer,community);
 			//Queuing A Request event based on the user thinking time
 			timeEvent = clock + peer->getRequestTime(peer);
@@ -593,6 +624,8 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 			//timeEvent = clock + getReplicateTimePeer(community->peers[idPeer]);
 			//event  = initEvent((TTimeEvent) timeEvent, REPLICATE, (TOwnerEvent)idPeer);
 			//enQueue(queue, event);
+		} else {
+			wtfCount++;
 		}
 
 		//dequeue processed event
