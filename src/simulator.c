@@ -92,6 +92,7 @@ void initSimulator(int simTime, TCommunity** pCommunity, TPriorityQueue** pQueue
 	TEvent *event;
 	TCommunity *community;
 	TPriorityQueue *queue;
+	int eventTime;
 
 	*pCommunity = createCommunity(simTime, scenarios);
 	community = *pCommunity;
@@ -107,8 +108,14 @@ void initSimulator(int simTime, TCommunity** pCommunity, TPriorityQueue** pQueue
 		peer = community->getPeer(community,i);
 
 		event = createEvent( peer->getDownSessionDuration(peer), JOIN, (TOwnerEvent) i);
+		eventTime = event->getTime(event);
 
-		queue->enqueue(queue, event->getTime(event), event);
+		queue->enqueue(queue, eventTime, event);
+
+		//Queuing A Topology manager event
+		eventTime += 10;
+		event  = createEvent((TTimeEvent) eventTime, TOPOLOGY, (TOwnerEvent)i);
+		queue->enqueue(queue, eventTime, event);
 
 	}
 
@@ -464,11 +471,6 @@ void runSimulator(unsigned int SimTime, unsigned int warmupTime, unsigned int sc
 //			timeEvent = clock + peer->getRequestTime(peer);
 //			event  = createEvent((TTimeEvent) timeEvent, REQUEST, (TOwnerEvent)idPeer);
 //			queue->enqueue(queue, timeEvent, event);
-
-			//Queuing A Topology manager event
-			timeEvent = clock + 10;
-			event  = createEvent((TTimeEvent) timeEvent, TOPOLOGY, (TOwnerEvent)idPeer);
-			queue->enqueue(queue, timeEvent, event);
 
 		}else if(typeEvent == TOPOLOGY){
 
