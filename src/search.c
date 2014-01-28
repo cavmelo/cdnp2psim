@@ -26,7 +26,7 @@ struct _data_randomwalk_search{
 };
 
 // random walk
-static void* runRandomWalkSearch(TSearch *search, void *vPeer, void *object, unsigned int clientId, int prefetch ){
+static void* runRandomWalkSearch(TSearch *search, void *vPeer, void *object, unsigned int clientId, float prefetchFraction ){
 	TPeer *peer = vPeer;
 	TDataSearch *data = search->data;
 	TDataRandomWalkSearch *data_rwalk = data->data_policy;
@@ -37,7 +37,7 @@ static void* runRandomWalkSearch(TSearch *search, void *vPeer, void *object, uns
 		TTopology *topo = peer->getTopologyManager(peer);
 		found = 1;
 
-		if (!peer->canStream(peer,object, clientId, prefetch)){
+		if (!peer->canStream(peer,object, clientId, prefetchFraction)){
 			TArrayDynamic *neighbors = topo->getNeighbors(topo);
 			if (idRequester >= 0){
 				topo->updateRequestsStats(topo, idRequester, 1);
@@ -131,7 +131,7 @@ static TItemFloadingSearch *createItemFloadingSearch(int level, int idRequester,
 	return item;
 }
 
-static void* runFloadingSearch(TSearch *search, void* vPeer, void* object, unsigned int clientId, int prefetch){
+static void* runFloadingSearch(TSearch *search, void* vPeer, void* object, unsigned int clientId, float prefetchFraction){
 	TPeer *peer = vPeer;
 	TDataSearch *data = search->data;
 	TDataFloadingSearch *data_floading = data->data_policy;
@@ -148,7 +148,7 @@ static void* runFloadingSearch(TSearch *search, void* vPeer, void* object, unsig
 	do{
 		TTopology *topo = peer->getTopologyManager(peer);
 
-		if (!peer->canStream(peer,object,clientId, prefetch)){
+		if (!peer->canStream(peer,object,clientId, prefetchFraction)){
 			TArrayDynamic *neighbors = topo->getNeighbors(topo);
 			if (idRequester>=0){
 				topo->updateRequestsStats(topo,idRequester,1);

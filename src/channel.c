@@ -46,14 +46,13 @@ typedef struct _data_channel{
 	float max_downlink;
 	float rate_uplink; // Mbps
 	float rate_downlink; // Mbps
-	float prefetchDownlinkRatePercent; //Percent: 0 to 1
 	TDictionary *ongoingUL; // opened data channel on UPLink
 	TDictionary *ongoingDL; // opened data channel on DOWNLink
 
 } TDataChannel;
 
 
-static TDataChannel *initDataChannel(float capacity, float rate_uplink, float prefetchDownlinkRatePercent){
+static TDataChannel *initDataChannel(float capacity, float rate_uplink){
 	TDataChannel *data = malloc(sizeof(TDataChannel));
 
 	data->capacity =capacity;
@@ -61,7 +60,6 @@ static TDataChannel *initDataChannel(float capacity, float rate_uplink, float pr
 	data->max_downlink = capacity - rate_uplink;
 	data->rate_uplink = rate_uplink;
 	data->rate_downlink = data->max_downlink;
-	data->prefetchDownlinkRatePercent = prefetchDownlinkRatePercent;
 	data->ongoingUL = createDictionary();
 	data->ongoingDL = createDictionary();
 	return data;
@@ -73,11 +71,8 @@ static TDataChannel *initDataChannel(float capacity, float rate_uplink, float pr
 
 enum {UPLINK = 1, DOWNLINK=2, UNDEFINED=3};
 
-static short canStreamDataChannel(TChannel *channel, float rate, int prefetch){
+static short canStreamDataChannel(TChannel *channel, float rate){
 	TDataChannel *data = channel->data;
-
-	if (prefetch)
-		rate *= 1.f + data->prefetchDownlinkRatePercent;
 
 	return data->rate_uplink > rate ? 1 : 0;
 }
@@ -94,17 +89,8 @@ static float getDLRateChannel(TChannel *channel){
 	return data->max_downlink - data->rate_downlink;
 }
 
-static float getPrefetchDownlinkRatePercentChannel(TChannel *channel){
+static short hasDownlinkChannel(TChannel *channel, float bitRate) {
 	TDataChannel *data = channel->data;
-
-	return data->prefetchDownlinkRatePercent;
-}
-
-static short hasDownlinkChannel(TChannel *channel, float bitRate, int prefetch) {
-	TDataChannel *data = channel->data;
-
-	if (prefetch)
-		bitRate *= 1 + data->prefetchDownlinkRatePercent;
 
 	return data->rate_downlink >= bitRate ? 1 : 0;
 }
@@ -131,12 +117,9 @@ static void closeULDataChannel(TChannel *channel, unsigned int idPeerDst){
 	free(ongoingDC);
 }
 
-static short openULDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb, int prefetch){
+static short openULDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb){
 	TDataChannel *data = channel->data;
 	short opened = 0; // status of requested data channel
-
-	if (prefetch)
-		eb *= 1.f + data->prefetchDownlinkRatePercent;
 
 	if (data->rate_uplink >= eb){
 		TOngoingDataChannel *ongDC = createOngoingDataChannel(eb, idPeerSrc, idPeerDst);
@@ -153,12 +136,9 @@ static short openULDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, 
 }
 
 
-static short openDLDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb, int prefetch){
+static short openDLDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, float eb){
 	TDataChannel *data = channel->data;
 	short opened=0; // status of requested data channel
-
-	if (prefetch)
-		eb *= 1.f + data->prefetchDownlinkRatePercent;
 
 	if( (data->rate_downlink>= eb) ){
 		TOngoingDataChannel *ongoingDC = createOngoingDataChannel(eb, idPeerSrc, idPeerDst);
@@ -175,16 +155,15 @@ static short openDLDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, 
 }
 
 
-TChannel *createDataChannel(float capacity, float rate_upload, float prefetchDownlinkRatePercent){
+TChannel *createDataChannel(float capacity, float rate_upload){
 
 	TChannel *channel = malloc(sizeof(TChannel));
 
-	channel->data = initDataChannel(capacity, rate_upload, prefetchDownlinkRatePercent);
+	channel->data = initDataChannel(capacity, rate_upload);
 
 	channel->canStream = canStreamDataChannel;
 	channel->getULRate = getULRateChannel;
 	channel->getDLRate = getDLRateChannel;
-	channel->getPrefetchDownlinkRatePercent = getPrefetchDownlinkRatePercentChannel;
 	channel->closeDL = closeDLDataChannel;
 	channel->openDL = openDLDataChannel;
 	channel->closeUL = closeULDataChannel;

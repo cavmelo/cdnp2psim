@@ -560,22 +560,22 @@ static short isDownPeer(TPeer* peer){
 	return (data->status == DOWN_PEER);
 }
 
-static void openULVideoChannelPeer(TPeer * peer, unsigned int destId, TObject *video, int prefetch){
+static void openULVideoChannelPeer(TPeer * peer, unsigned int destId, TObject *video, float prefetchFraction){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
 	TDictionary *d = data->videosSending;
 	TKeyDictionary key;
 
-	float bitRate = getBitRateObject(video);
+	float bitRate = getBitRateObject(video) * (1.f + prefetchFraction);
 	unsigned int *content = malloc(sizeof(unsigned int));;
 
 	*content = destId;
 	d->insert(d, destId, content);
 
-	channel->openUL(channel, data->id, destId, bitRate, prefetch);
+	channel->openUL(channel, data->id, destId, bitRate);
 }
 
-static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *video, int prefetch){
+static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *video, float prefetchFraction){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
 	TDictionary *dc = data->channelsReceiving;
@@ -586,7 +586,7 @@ static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *vi
 	float bitRate;
 	unsigned int *content = malloc(sizeof(unsigned int));;
 
-	bitRate = getBitRateObject(video);
+	bitRate = getBitRateObject(video) * (1.f + prefetchFraction);
 
 	getIdObject(video, idVideo);
 	key = dv->keyGenesis(idVideo);
@@ -597,7 +597,7 @@ static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *vi
 
 	dc->insert(dc, key, content );
 
-	channel->openDL(channel, data->id, destId, bitRate, prefetch);
+	channel->openDL(channel, data->id, destId, bitRate);
 }
 
 static int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
@@ -688,12 +688,12 @@ static TObject* getVideoReceivingFromPeer(TPeer *peer, int serverId){
 	return NULL;
 }
 
-static short hasDownlinkPeer(TPeer* peer, TObject *video,  int prefetch){
+static short hasDownlinkPeer(TPeer* peer, TObject *video,  float prefetchFraction){
 	TDataPeer *data = peer->data;
 	TChannel *channel = data->channel;
-	float bitRate = getBitRateObject(video);
+	float bitRate = getBitRateObject(video) * (1.f + prefetchFraction);
 
-	return channel->hasDownlink(channel, bitRate, prefetch);
+	return channel->hasDownlink(channel, bitRate);
 }
 
 static short hasCachedPeer(TPeer* peer, void *object){
@@ -704,7 +704,7 @@ static short hasCachedPeer(TPeer* peer, void *object){
 	//return (data->status == DOWN_PEER);
 }
 
-static short canStreamPeer(TPeer* peer, void *object, unsigned int clientId, int prefetch){
+static short canStreamPeer(TPeer* peer, void *object, unsigned int clientId, float prefetchFraction){
 	TDataPeer *data = peer->data;
 	TCache *cache = data->cache;
 	TChannel *channel = data->channel;
@@ -723,12 +723,16 @@ static short canStreamPeer(TPeer* peer, void *object, unsigned int clientId, int
 	if(content)
 		return 0;
 
+	fprintf(stderr, "Bit rate1: %f\n", getBitRateObject(object));
+	fprintf(stderr, "Prefetch fraction: %f\n", prefetchFraction);
 	// Obter a taxa necessária do vídeo
-	bitRate = getBitRateObject(object);
+	bitRate = getBitRateObject(object) * (1.f + prefetchFraction);
+	fprintf(stderr, "Bit rate2: %f\n", bitRate);
+	fprintf(stderr, "Can stream: %d\n", channel->canStream(channel, bitRate));
 		
 	// 3o) Chamar channel->canStream com essa taxa
 	// para verificar se tem taxa de uplink disponívels
-	return channel->canStream(channel, bitRate, prefetch);
+	return channel->canStream(channel, bitRate);
 }
 
 static void* getProfilePeer(TPeer* peer){

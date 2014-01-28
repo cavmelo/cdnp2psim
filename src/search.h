@@ -10,7 +10,7 @@
 
 typedef struct search TSearch;
 
-typedef void* (*TRunSearch)(TSearch *search, void *peer, void *object, unsigned int clientId, int prefetch);
+typedef void* (*TRunSearch)(TSearch *search, void *peer, void *object, unsigned int clientId, float prefetchFraction);
 typedef void (*TUFreeSearch)(TSearch *search);
 struct search{
 	void *data;

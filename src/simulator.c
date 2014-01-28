@@ -196,28 +196,25 @@ void prefetch(TPeer* peer, unsigned int idPeer, THashTable* hashTable, TCommunit
 	TItemHashTable *item;
 	unsigned int idServerPeer;
 	TChannel* channel;
-	float prefetchDownlinkRatePercent;
+	float prefetchRate;
 
 	channel = peer->getChannel(peer);
-	prefetchDownlinkRatePercent = channel->getPrefetchDownlinkRatePercent(channel);
-
-	if (prefetchDownlinkRatePercent == 0.f)
-		return;
 
 	dataSource = peer->getDataSource(peer);
 	video = dataSource->pickForPrefetch(dataSource);
+	prefetchRate = dataSource->getPrefetchRate(dataSource);
 
-	if (video == NULL || !peer->hasDownlink(peer, video, 1))
+	if (video == NULL || !peer->hasDownlink(peer, video, prefetchRate))
 		return;
 
-	serverPeer = community->searching(community,peer,video,idPeer, 1);
+	serverPeer = community->searching(community,peer,video,idPeer, prefetchRate);
 
 	if ( serverPeer != NULL && serverPeer != peer ){
 			getIdObject(video, idVideo);
 		idServerPeer = serverPeer->getId(serverPeer);
 		//printf("Comecar prefetch de %s: %d <- %d\n", idVideo, idPeer, idServerPeer);
-		serverPeer->openULVideoChannel(serverPeer, idPeer, video, 1);
-		peer->openDLVideoChannel(peer, idServerPeer, video, 1);
+		serverPeer->openULVideoChannel(serverPeer, idPeer, video, prefetchRate);
+		peer->openDLVideoChannel(peer, idServerPeer, video, prefetchRate);
 
 		if ( peer->insertCache( peer, cloneObject(video), systemData ) ){
 
@@ -244,6 +241,7 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 	unsigned int idServerPeer;
 	TIdObject idVideo;
 	int videoLength;
+	float zero = 0.f;
 
 	TPeer *peer = community->getPeer(community, idPeer);
 
@@ -253,7 +251,7 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 	//set video that the peer is currently viewing
 	peer->setCurrentlyViewing(peer, video);
 
-	serverPeer = community->searching(community,peer,video,idPeer, 0);
+	serverPeer = community->searching(community,peer,video,idPeer, zero);
 
 	videoLength = getLengthObject(video);
 
@@ -281,8 +279,8 @@ int processRequestSimulator(unsigned int idPeer, THashTable* hashTable, TCommuni
 
 			//printf("Comecar a assistir: %d %s\n", idPeer, idVideo);
 			// Estabelecer canal de dados
-			serverPeer->openULVideoChannel(serverPeer, idPeer, video, 0);
-			peer->openDLVideoChannel(peer, idServerPeer, video, 0);
+			serverPeer->openULVideoChannel(serverPeer, idPeer, video, 0.f);
+			peer->openDLVideoChannel(peer, idServerPeer, video, 0.f);
 		} else
 			//printf("Comecar a assistir do CDN: %d %s\n", idPeer, idVideo);
 

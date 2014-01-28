@@ -558,6 +558,12 @@ void disposeFromPlaylistSingletonDataCatalog(TDataCatalog *dataCatalog) {
 
 // data source related functions and definitions
 //
+float getPrefetchRateDataSource(TDataSource *dataSource) {
+	TPrefetch *prefetch = dataSource->prefetch;
+
+	return prefetch->fraction;
+}
+
 void *pickFromCollectionDataSource(TDataSource *dataSource) {
 	TObject *obj;
 	// pick one video from catalog
@@ -677,6 +683,12 @@ void resetFromPlaylistDataSource(TDataSource *dataSource) {
 
 }
 
+void* pickForPrefetchDataSource(TDataSource *dataSource){
+	TPrefetch *prefetch = dataSource->prefetch;
+
+	return prefetch->dynamic(dataSource);
+}
+
 void* pickForPrefetchNothingDataSource(TDataSource *dataSource){
 	return NULL;
 }
@@ -710,9 +722,10 @@ void* createFromPlaylistDataSource(TDataCatalog *dataCatalog) {
 
 	data->playlist = clonePlaylist(data->objects[i]);
 
+	dataSource->getPrefetchRate = getPrefetchRateDataSource;
 	dataSource->datacatalog = dataCatalog;
 	dataSource->pick = pickFromPlaylistDataSource;
-	dataSource->pickForPrefetch = pickForPrefetchPlaylistDataSource;
+	dataSource->pickForPrefetch = pickForPrefetchDataSource;
 	dataSource->reset = resetFromPlaylistDataSource;
 	dataSource->size = sizeFromPlaylistDataSource;
 	dataSource->duration = durationFromPlaylistDataSource;
@@ -772,8 +785,9 @@ void* createFromCollectionDataSource(TDataCatalog *dataCatalog) {
 
 	dataSource->datacatalog = dataCatalog;
 
+	dataSource->getPrefetchRate = getPrefetchRateDataSource;
 	dataSource->pick = pickFromCollectionDataSource;
-	dataSource->pickForPrefetch = pickForPrefetchNothingDataSource;
+	dataSource->pickForPrefetch = pickForPrefetchDataSource;
 	dataSource->reset = resetFromCollectionDataSource;
 	dataSource->size = sizeFromCollectionDataSource;
 	dataSource->duration = durationFromCollectionDataSource;
@@ -782,3 +796,31 @@ void* createFromCollectionDataSource(TDataCatalog *dataCatalog) {
 	return dataSource;
 }
 
+
+void *createPrefetchNone(void *pars) {
+	TPrefetch *prefetch;
+
+	prefetch = (TPrefetch*) malloc(sizeof(TPrefetch));
+
+	prefetch->dynamic = pickForPrefetchNothingDataSource;
+	prefetch->fraction = 0.f;
+
+	return prefetch;
+}
+
+
+void *createPrefetchNextFromPlaylist(char *pars) {
+	TPrefetch *prefetch;
+	TParameters *lp = createParameters(pars, PARAMETERS_SEPARATOR);
+
+	lp->iterator(lp);
+
+	prefetch = (TPrefetch*) malloc(sizeof(TPrefetch));
+
+	prefetch->dynamic = pickForPrefetchPlaylistDataSource;
+	prefetch->fraction = atof(lp->next(lp));
+
+	lp->dispose(lp);
+
+	return prefetch;
+}

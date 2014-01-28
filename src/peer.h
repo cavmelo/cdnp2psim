@@ -49,10 +49,10 @@ typedef void (* TSetCachePeer)(TPeer* peer, void *cache);
 typedef void (* TSetDataSourcePeer)(TPeer *peer, void *dataSource);
 typedef short (* TIsUpPeer)(TPeer* peer);
 typedef short (* TIsDownPeer)(TPeer* peer);
-typedef short (* THasDownlinkPeer)(TPeer *peer, TObject *video, int prefetch);
+typedef short (* THasDownlinkPeer)(TPeer *peer, TObject *video, float prefetchFraction);
 
-typedef void (* TOpenULVideoChannelPeer)(TPeer * peer, unsigned int destId, TObject *video, int prefetch);
-typedef void (* TOpenDLVideoChannelPeer)(TPeer * peer, unsigned int destId, TObject *video, int prefetch);
+typedef void (* TOpenULVideoChannelPeer)(TPeer * peer, unsigned int destId, TObject *video, float prefetchFraction);
+typedef void (* TOpenDLVideoChannelPeer)(TPeer * peer, unsigned int destId, TObject *video, float prefetchFraction);
 typedef void (* TCloseULVideoChannelPeer)(TPeer * peer, unsigned int destId);
 typedef int (* TCloseDLVideoChannelPeer)(TPeer * peer, TObject *video);
 typedef TDictionary *(* TGetOpenULVideoChannelsPeer)(TPeer * peer);
@@ -63,7 +63,7 @@ typedef TObject *(* TGetVideoReceivingFromPeer)(TPeer * peer, int serverId);
 typedef void (* TSetupJoiningPeer)(TPeer *peer);
 typedef void *(* TGetTopologyManagerPeer)(TPeer *peer);
 typedef void (* TSetTopologyManagerPeer)(TPeer *peer, void* tm);
-typedef short (* TCanStreamPeer)(TPeer *peer, void *video, unsigned int clientId, int prefetch);
+typedef short (* TCanStreamPeer)(TPeer *peer, void *video, unsigned int clientId, float prefetchFraction);
 
 //Canal
 typedef void *(* TGetChannelPeer)(TPeer *peer);

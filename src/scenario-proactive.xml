@@ -29,7 +29,6 @@
 			<channel>	
 				<parameter name="capacity">768</parameter>
 				<parameter name="rateUplink">512</parameter>
-				<parameter name="prefetchDownlinkRatePercent">0.3</parameter>
 
 			</channel>		
 			<churn>
@@ -55,6 +54,10 @@
 				</request>
 				<datasource>
 					<parameter name="dynamic">DATASOURCE:PLAYLIST</parameter>
+					<prefetch>
+						<parameter name="dynamic">PREFETCH:NEXTFROMPLAYLIST</parameter>
+						<parameter name="fraction">0.3</parameter>
+					</prefetch>
 					<access>
 						<parameter name="dynamic">RANDOM:FROMFILESINGLETON</parameter>
 						<parameter name="source">/home/thais/Documents/Redes/CdnP2P/Arquivos/Dados_Simulacao_ColecaoEntretenimento/PadraoAcesso_Playlist_Entretenimento_Agosto2012.out</parameter>
@@ -98,7 +101,6 @@
 			<channel>	
 				<parameter name="capacity">768</parameter>
 				<parameter name="rateUplink">512</parameter>
-				<parameter name="prefetchDownlinkRatePercent">0.3</parameter>
 
 			</channel>		
 			<churn>
@@ -124,6 +126,9 @@
 				</request>
 				<datasource>
 					<parameter name="dynamic">DATASOURCE:COLLECTION</parameter>
+					<prefetch>
+						<parameter name="dynamic">PREFETCH:NONE</parameter>
+					</prefetch>
 					<access>
 						<parameter name="dynamic">RANDOM:FROMFILESINGLETON</parameter>
 						<parameter name="source">/home/thais/Documents/Redes/CdnP2P/Arquivos/Dados_Simulacao_ColecaoEntretenimento/Padrao_Acesso_ColecaoYouTubeEntretenimento.out</parameter>

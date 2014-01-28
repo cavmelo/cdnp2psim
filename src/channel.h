@@ -1,22 +1,20 @@
 typedef struct channel TChannel;
 
-TChannel *createDataChannel(float capacity, float rate_upload, float percentDownlinkRatePercent);
+TChannel *createDataChannel(float capacity, float rate_upload);
 
-typedef  short (* TCanStreamDataChannel )(TChannel *, float rate, int prefetch);
+typedef  short (* TCanStreamDataChannel )(TChannel *, float rate);
 typedef  float (* TGetULRate )(TChannel *);
 typedef  float (* TGetDLRate )(TChannel *);
-typedef  float (* TGetPrefetchDownlinkRatePercent )(TChannel *);
-typedef  short (* TOpenDLDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate, int prefetch);
-typedef  short (* TOpenULDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate, int prefetch);
+typedef  short (* TOpenDLDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
+typedef  short (* TOpenULDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
 typedef  void (* TCloseDLDataChannel )(TChannel *, unsigned int idPeerDst);
 typedef  void (* TCloseULDataChannel )(TChannel *, unsigned int idPeerDst);
-typedef  short (* THasDownlinkChannel )(TChannel *, float bitRate, int prefetch);
+typedef  short (* THasDownlinkChannel )(TChannel *, float bitRate);
 
 struct channel{
 	void *data;
 	TGetULRate getULRate;
 	TGetDLRate getDLRate;
-	TGetPrefetchDownlinkRatePercent getPrefetchDownlinkRatePercent;
 	TCanStreamDataChannel canStream;
 	TOpenDLDataChannel openDL; // open a DownLink data Channel
 	TOpenULDataChannel openUL;

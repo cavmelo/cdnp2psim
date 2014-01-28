@@ -252,6 +252,27 @@ static void* initRandomicSymTable(TDictionary *d){
 }
 
 
+static void* initPrefetchSymTable(TDictionary *d){
+	TKeyDictionary key;
+	TDataCreateSymTable *sym;
+
+	sym = malloc(sizeof(TDataCreateSymTable));
+	key = d->keyGenesis("PREFETCH:NONE");
+	sym->create= (TCreateSymTable)createPrefetchNone;
+	sprintf(sym->pars,";");
+	d->insert(d,key,sym);
+
+	sym = malloc(sizeof(TDataCreateSymTable));
+	key = d->keyGenesis("PREFETCH:NEXTFROMPLAYLIST");
+	sym->create= (TCreateSymTable)createPrefetchNextFromPlaylist;
+	sprintf(sym->pars,"fraction;");
+	d->insert(d,key,sym);
+
+	return d;
+}
+
+
+
 //
 //Table of Symbols
 //Object management Policy
@@ -395,6 +416,7 @@ TSymTable *createSymTable(){
 	TDictionary* dic = createDictionary();
 
 	initDataCatalogSymTable(dic);
+	initPrefetchSymTable(dic);
 	initDataSourceSymTable(dic);
 	initTopologyManagerSymTable(dic);
 	initSessionLastingPolicySymTable(dic);

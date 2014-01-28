@@ -146,6 +146,22 @@ static void setupContentPeerCommunity(int id, TPeer *peer, xmlDocPtr doc, TSymTa
 	peer->setDynamicRequest(peer,requestContent);
 	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
 
+	sprintf(xpath,"/community/tier[%d]/peer/content/datasource/prefetch/parameter[@name=\"dynamic\"]",id+1);
+	xdynamic = xgetOneParameter(doc, xpath);
+
+	randSymTable->getPars(randSymTable,xdynamic,pars);
+	entry[0]='\0';
+	parameter = strtok_r(pars, PARAMETERS_SEPARATOR, &last);
+	while(parameter){
+		sprintf(xpath,"/community/tier[%d]/peer/content/datasource/prefetch/parameter[@name=\"%s\"]",id+1,parameter);
+		value = xgetOneParameter(doc,xpath);
+		sprintf(entry+strlen(entry),"%s;",value); free(value);
+		parameter = strtok_r(NULL, PARAMETERS_SEPARATOR, &last);
+	}
+
+	TPrefetch *prefetch = (TPrefetch*)randSymTable->caller(randSymTable,xdynamic,entry);//
+	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
+
 	sprintf(xpath,"/community/tier[%d]/peer/content/datasource/access/parameter[@name=\"dynamic\"]",id+1);
 	xdynamic = xgetOneParameter(doc, xpath);
 
@@ -186,6 +202,7 @@ static void setupContentPeerCommunity(int id, TPeer *peer, xmlDocPtr doc, TSymTa
 	xdynamic = xgetOneParameter(doc, xpath);
 
 	dataSource = DSsymTable->caller(DSsymTable,xdynamic,dataCatalog);
+	dataSource->prefetch = prefetch;
 
 	peer->setDataSource(peer,dataSource);
 
@@ -334,7 +351,6 @@ static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc){
 	char *last=NULL;
 	float capacity;
 	float rateUplink;
-	float prefetchDownlinkRatePercent;
 	TChannel *channel;
 
 	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"capacity\"]",id+1);
@@ -347,12 +363,7 @@ static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc){
 	rateUplink = atof((char*)xRateUplink);
 	free(xRateUplink);
 
-	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"prefetchDownlinkRatePercent\"]",id+1);
-	xPrefetchDownlinkRatePercent = xgetOneParameter(doc, xpath);
-	prefetchDownlinkRatePercent = atof((char*)xPrefetchDownlinkRatePercent);
-	free(xPrefetchDownlinkRatePercent);
-
-	channel = createDataChannel(capacity, rateUplink, prefetchDownlinkRatePercent);
+	channel = createDataChannel(capacity, rateUplink);
 	peer->setChannel(peer,channel);
 }
 
@@ -776,14 +787,14 @@ static int getNumberOfAlivePeerCommunity(TCommunity *community){
 	return alive->getOccupancy(alive);
 }
 
-static void* searchingCommunity(TCommunity *community, void *vpeer, void *object, unsigned int clientId, int prefetch){
+static void* searchingCommunity(TCommunity *community, void *vpeer, void *object, unsigned int clientId, float prefetchRate){
 	TDataCommunity *data = community->data;
 	TPeer *peer = vpeer;
 	int tierPeer = peer->getTier(peer);
 
 	TSearch *search = data->tiers->tier[tierPeer-1].searching;
 
-	return search->run(search,peer,object,clientId, prefetch);
+	return search->run(search,peer,object,clientId, prefetchRate);
 
 }
 
