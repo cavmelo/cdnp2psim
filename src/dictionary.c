@@ -279,6 +279,15 @@ static void IteratorAVL(TNodeDictionary* T, TListGeneral* l){
 
 }
 
+static void KeyIteratorAVL(TNodeDictionary* T, TListGeneral* l){
+	if (T==NULL)
+		return;
+
+	KeyIteratorAVL(T->left, l);
+	insertTailListGeneral(l,(void*)T->key);
+	KeyIteratorAVL(T->right, l);
+}
+
 static void *freeAVL(TNodeDictionary* T){
 	if (T==NULL){
 		return NULL;
@@ -328,6 +337,14 @@ static void* rootAVL( TNodeDictionary* P )
 		return P;
 	else
 		return P->content;
+}
+
+static TKeyDictionary rootKeyAVL(TNodeDictionary* P)
+{
+	if (P == NULL)
+		return -1;
+	else
+		return P->key;
 }
 
 
@@ -566,6 +583,12 @@ static void* retrievalFirstDictionary(TDictionary* dic){
 
 }
 
+static TKeyDictionary retrievalFirstKeyDictionary(TDictionary* dict){
+	TDataDictionary *data = dict->data;
+
+	return rootKeyAVL(data->root);
+}
+
 
 static short hasDictionary(TDictionary* dic, TKeyDictionary key){
 	TDataDictionary *data = dic->data;
@@ -622,6 +645,7 @@ TDictionary *createDictionary(){
 	d->remove = removeDictionary;
 	d->retrieval = retrievalDictionary;
 	d->first = retrievalFirstDictionary;
+	d->firstKey = retrievalFirstKeyDictionary;
 	d->keyGenesis = keyGenesisDictionary;
 	d->ufree = freeDictionary;
 
@@ -631,6 +655,18 @@ TDictionary *createDictionary(){
 
 // ITERATOR dictionary
 //
+static void *initKeyIteratorDictionary(TDictionary *dic){
+	TDataDictionary *dataDic = dic->data;
+	TListGeneral *l = createListGeneral(NULL);
+	TDataListGeneral *dataLG = l->data;
+
+	KeyIteratorAVL(dataDic->root, l);
+
+	dataLG->current = dataLG->first;
+
+	return l;
+}
+
 static void *initIteratorDictionary(TDictionary *dic){
 	TDataDictionary *dataDic = dic->data;
 	TListGeneral *l = createListGeneral(NULL);
@@ -659,7 +695,23 @@ void freeSoftIteratorDictionary( TIterator* it ){
 }
 
 
+TIterator* createKeyIteratorDictionary( TDictionary* dic){
+	TIterator *it = malloc(sizeof(TIterator));
+	TDataIterator *data = malloc(sizeof(TDataIterator));
 
+	//initList();
+	data->holder = initKeyIteratorDictionary(dic);
+
+	it->data = data;
+	it->next = nextIterator;
+	it->hasNext = hasNextIterator;
+	it->reset = resetIterator;
+	it->current = currentIterator;
+	it->has = hasIterator;
+	it->ufree = freeIteratorDictionary;
+
+	return it;
+}
 
 TIterator* createIteratorDictionary( TDictionary* dic ){
 	TIterator *it = malloc(sizeof(TIterator));

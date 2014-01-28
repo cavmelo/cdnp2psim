@@ -25,6 +25,7 @@ struct _data_playlist {
 	char published[25];
 	char updated[25];
 	int next;
+	int prefetchNext;
 	void **objects;
 };
 
@@ -32,6 +33,7 @@ typedef int (*TDurationPlaylist)(TPlaylist *);
 typedef int (*TFirstkDurationPlaylist)(TPlaylist *, int);
 typedef int (*TLengthPlaylist)(TPlaylist *);
 typedef void *(*TNextPlaylist)(TPlaylist *);
+typedef void *(*TNextPrefetchPlaylist)(TPlaylist *);
 typedef TPlaylist *(*TClonePlaylist)(TPlaylist *);
 static TPlaylist* initPlaylist(char *id, char *owner, int duration, int length,
 		int countHint, char *published, char *updated, void** objects);
@@ -42,6 +44,7 @@ struct playlist {
 	TFirstkDurationPlaylist firstkduration;
 	TLengthPlaylist length;
 	TNextPlaylist next;
+	TNextPrefetchPlaylist nextPrefetch;
 	TClonePlaylist clone;
 };
 
@@ -51,7 +54,18 @@ static void* nextPlaylist(TPlaylist *pl) {
 	if (data->next + 1 == data->length)
 		return NULL ;
 	data->next++;
+	if(data->prefetchNext < data->next)
+		data->prefetchNext = data->next;
 	return data->objects[data->next];
+}
+
+static void* nextPrefetchPlaylist(TPlaylist *pl) {
+	struct _data_playlist* data = pl->data;
+
+	if (data->prefetchNext + 1 == data->length)
+		return NULL ;
+	data->prefetchNext++;
+	return data->objects[data->prefetchNext];
 }
 
 static int durationPlaylist(TPlaylist *pl) {
@@ -114,9 +128,11 @@ static TPlaylist* initPlaylist(char *id, char *owner, int duration, int length,
 	data->objects = objects;
 
 	data->next = -1;
+	data->prefetchNext = -1;
 
 	pl->data = data;
 	pl->next = nextPlaylist;
+	pl->nextPrefetch = nextPrefetchPlaylist;
 	pl->duration = durationPlaylist;
 	pl->firstkduration = firstkDurationPlaylist;
 	pl->length = lengthPlaylist;
@@ -193,6 +209,8 @@ static TFromCollectionDataCatalog *initFromCollectionDataCatalog(char *filename,
 		setLastAccessObject(objects[i], 0);
 		setCumulativeValueObject(objects[i], 0.0);
 		setNormalizedByteServedObject(objects[i], 0.0);
+
+		setBitRateObject(objects[i], 128.f);
 
 		i++;
 		//fscanf(fp, "%s %d %d %d %d %f", idVideo, &min, &sec, &views,  &stars, &ratings);
@@ -372,6 +390,8 @@ TSetList **initFromPlayListDataCatalog(char *playLists, unsigned int length,
 		setCumulativeValueObject(object, 0.0);
 		setNormalizedByteServedObject(object, 0.0);
 
+		setBitRateObject(object, 128.f);
+
 		key = d->keyGenesis(idVideo);
 		d->insert(d, key, object);
 
@@ -538,6 +558,12 @@ void disposeFromPlaylistSingletonDataCatalog(TDataCatalog *dataCatalog) {
 
 // data source related functions and definitions
 //
+float getPrefetchRateDataSource(TDataSource *dataSource) {
+	TPrefetch *prefetch = dataSource->prefetch;
+
+	return prefetch->fraction;
+}
+
 void *pickFromCollectionDataSource(TDataSource *dataSource) {
 	TObject *obj;
 	// pick one video from catalog
@@ -657,6 +683,32 @@ void resetFromPlaylistDataSource(TDataSource *dataSource) {
 
 }
 
+void* pickForPrefetchDataSource(TDataSource *dataSource){
+	TPrefetch *prefetch = dataSource->prefetch;
+
+	return prefetch->dynamic(dataSource);
+}
+
+void* pickForPrefetchNothingDataSource(TDataSource *dataSource){
+	return NULL;
+}
+
+void* pickForPrefetchPlaylistDataSource(TDataSource *dataSource){
+	void *object, *clone;
+	TDataCatalog *dataCatalog = dataSource->datacatalog;
+	TFromPlaylistDataCatalog *data = dataCatalog->data;
+
+	TPlaylist *playlist = data->playlist;
+
+	object = playlist->nextPrefetch(playlist);
+
+	if(object == NULL)
+		return NULL;
+
+	clone = cloneObject(object);
+
+	return clone;
+}
 
 void* createFromPlaylistDataSource(TDataCatalog *dataCatalog) {
 	TDataSource *dataSource;
@@ -670,8 +722,10 @@ void* createFromPlaylistDataSource(TDataCatalog *dataCatalog) {
 
 	data->playlist = clonePlaylist(data->objects[i]);
 
+	dataSource->getPrefetchRate = getPrefetchRateDataSource;
 	dataSource->datacatalog = dataCatalog;
 	dataSource->pick = pickFromPlaylistDataSource;
+	dataSource->pickForPrefetch = pickForPrefetchDataSource;
 	dataSource->reset = resetFromPlaylistDataSource;
 	dataSource->size = sizeFromPlaylistDataSource;
 	dataSource->duration = durationFromPlaylistDataSource;
@@ -731,7 +785,9 @@ void* createFromCollectionDataSource(TDataCatalog *dataCatalog) {
 
 	dataSource->datacatalog = dataCatalog;
 
+	dataSource->getPrefetchRate = getPrefetchRateDataSource;
 	dataSource->pick = pickFromCollectionDataSource;
+	dataSource->pickForPrefetch = pickForPrefetchDataSource;
 	dataSource->reset = resetFromCollectionDataSource;
 	dataSource->size = sizeFromCollectionDataSource;
 	dataSource->duration = durationFromCollectionDataSource;
@@ -740,3 +796,31 @@ void* createFromCollectionDataSource(TDataCatalog *dataCatalog) {
 	return dataSource;
 }
 
+
+void *createPrefetchNone(void *pars) {
+	TPrefetch *prefetch;
+
+	prefetch = (TPrefetch*) malloc(sizeof(TPrefetch));
+
+	prefetch->dynamic = pickForPrefetchNothingDataSource;
+	prefetch->fraction = 0.f;
+
+	return prefetch;
+}
+
+
+void *createPrefetchNextFromPlaylist(char *pars) {
+	TPrefetch *prefetch;
+	TParameters *lp = createParameters(pars, PARAMETERS_SEPARATOR);
+
+	lp->iterator(lp);
+
+	prefetch = (TPrefetch*) malloc(sizeof(TPrefetch));
+
+	prefetch->dynamic = pickForPrefetchPlaylistDataSource;
+	prefetch->fraction = atof(lp->next(lp));
+
+	lp->dispose(lp);
+
+	return prefetch;
+}

@@ -23,6 +23,7 @@ typedef void (* TInsertDictionary )(TDictionary *, TKeyDictionary, void *);
 typedef void* (* TRetrievalDictionary )(TDictionary *, TKeyDictionary);
 typedef void* (* TRetrievalMinimalDictionary )(TDictionary *);
 typedef void* (* TRetrievalRootDictionary )(TDictionary *);
+typedef TKeyDictionary (* TRetrievalRootKeyDictionary )(TDictionary *);
 typedef void* (* TRemoveDictionary )(TDictionary *, TKeyDictionary);
 typedef short (* THasDictionary )(TDictionary *, TKeyDictionary);
 typedef void (* TUFreeDictionary )(TDictionary *);
@@ -40,6 +41,7 @@ struct dictionary {
 	TRetrievalDictionary retrieval;
 	TRetrievalMinimalDictionary minimal;
 	TRetrievalRootDictionary first;
+	TRetrievalRootKeyDictionary firstKey;
 	TRemoveDictionary remove;
 	THasDictionary has;
 	TKeyGenesisDictionary keyGenesis;
@@ -101,6 +103,7 @@ struct iterator {
 };
 
 TIterator* createIteratorDictionary( TDictionary* d );
+TIterator* createKeyIteratorDictionary( TDictionary* d );
 void freeIteratorDictionary(TIterator* i);
 
 TIterator* createSoftIteratorDictionary( TDictionary* d );

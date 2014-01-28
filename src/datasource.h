@@ -50,17 +50,32 @@ void disposeLogDataSource(TLogDataSource *log);
 
 //data Source related definitions
 typedef struct datasource TDataSource;
+typedef float (* TGetPrefetchRateDataSource)(TDataSource* );
 typedef void* (* TPickDataSource)(TDataSource *);
+typedef void* (* TPickForPrefetchDataSource)(TDataSource *);
 typedef void (* TResetDataSource)(TDataSource *);
 typedef int (* TSizeDataSource)(TDataSource *);
 typedef int (* TDurationDataSource)(TDataSource *);
 typedef int (* TFirstkDurationDataSource)(TDataSource *, int k);
+
+struct prefetch{
+	TPickForPrefetchDataSource dynamic;
+	float fraction;
+};
+typedef struct prefetch TPrefetch;
+
+void *createPrefetchNone(void *pars);
+void *createPrefetchNextFromPlaylist(char *pars);
+
 struct datasource{
 	//private data
 	void *datacatalog;
+	TPrefetch *prefetch;
 
 	// public methos
+	TGetPrefetchRateDataSource getPrefetchRate;
 	TPickDataSource pick;
+	TPickForPrefetchDataSource pickForPrefetch;
 	TResetDataSource reset;
 	TSizeDataSource size;
 	TDurationDataSource duration;

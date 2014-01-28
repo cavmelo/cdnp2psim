@@ -9,6 +9,7 @@
 #include "topology.h"
 #include "dictionary.h"
 #include "peer.h"
+#include "channel.h"
 
 
 typedef struct profile TProfilePolicyPeer;
@@ -218,7 +219,7 @@ static void updateRequestsMapQuery(TMapQuery *map, int hops){
 static void showMapQuery(TMapQuery *map){
 	if (map){
 		TDataMapQuery *data = map->data;
-		printf("%u %d %d %d %d\n", data->idPeer, data->requests, data->hopRequests, data->hits, data->hopHits);
+		printf("%u\t%d\t%d\t%d\t%d\n", data->idPeer, data->requests, data->hopRequests, data->hits, data->hopHits);
 	}
 }
 
@@ -256,12 +257,21 @@ struct _data_peer{
     TTopology *topology;
     //! policies for profile estimation
     TProfilePolicyPeer *profilePolicy;
+
+    //Canal
+    TChannel *channel;
+
+    TObject *currentlyViewing;
+
+    TDictionary *channelsReceiving;
+    TDictionary *videosReceiving;
+    TDictionary *videosSending;
 };
 
 
 
 
-TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topology ){
+TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topology, void *channel){
 	TDataPeer *data = malloc(sizeof(TDataPeer));
 
 	data->id = id;
@@ -281,6 +291,15 @@ TDataPeer *initDataPeer(unsigned int id, short tier, void *dynamicJoin, void *dy
 	data->topology = topology;
 
 	data->Queries = createDictionary();
+
+	//Canal
+	data->channel = channel;
+
+	data->currentlyViewing = NULL;
+
+	data->channelsReceiving = createDictionary();
+	data->videosReceiving = createDictionary();
+	data->videosSending = createDictionary();
 
 	return data;
 }
@@ -391,6 +410,32 @@ static void* getTopologyManagerPeer(TPeer *peer){
 	TDataPeer *data = peer->data;
 
 	return data->topology;
+}
+
+//Canal
+static void setChannelPeer(TPeer *peer, void *channel){
+	TDataPeer *data = peer->data;
+
+	data->channel = channel;
+}
+
+//Canal
+static void setCurrentlyViewingPeer(TPeer *peer, void *currentlyViewing){
+	TDataPeer *data = peer->data;
+
+	data->currentlyViewing = currentlyViewing;
+}
+
+static void* getChannelPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->channel;
+}
+
+static void* getCurrentlyViewingPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->currentlyViewing;
 }
 
 static TStatsPeer* getOnStatsPeer(TPeer *peer){
@@ -515,12 +560,179 @@ static short isDownPeer(TPeer* peer){
 	return (data->status == DOWN_PEER);
 }
 
+static void openULVideoChannelPeer(TPeer * peer, unsigned int destId, TObject *video, float prefetchFraction){
+	TDataPeer *data = peer->data;
+	TChannel *channel = data->channel;
+	TDictionary *d = data->videosSending;
+	TKeyDictionary key;
+
+	float bitRate = getBitRateObject(video) * (1.f + prefetchFraction);
+	unsigned int *content = malloc(sizeof(unsigned int));;
+
+	*content = destId;
+	d->insert(d, destId, content);
+
+	channel->openUL(channel, data->id, destId, bitRate);
+}
+
+static void openDLVideoChannelPeer(TPeer *peer, unsigned int destId, TObject *video, float prefetchFraction){
+	TDataPeer *data = peer->data;
+	TChannel *channel = data->channel;
+	TDictionary *dc = data->channelsReceiving;
+	TDictionary *dv = data->videosReceiving;
+	TIdObject idVideo;
+	TKeyDictionary key;
+
+	float bitRate;
+	unsigned int *content = malloc(sizeof(unsigned int));;
+
+	bitRate = getBitRateObject(video) * (1.f + prefetchFraction);
+
+	getIdObject(video, idVideo);
+	key = dv->keyGenesis(idVideo);
+	dv->insert(dv, key, video);
+
+	key = dc->keyGenesis(idVideo);
+	*content = destId;
+
+	dc->insert(dc, key, content );
+
+	channel->openDL(channel, data->id, destId, bitRate);
+}
+
+static int closeDLVideoChannelPeer(TPeer * peer, TObject *video){
+	TDataPeer *data = peer->data;
+	TChannel *channel = data->channel;
+	TDictionary *dc = data->channelsReceiving;
+	TDictionary *dv = data->videosReceiving;
+	TIdObject idVideo;
+	TKeyDictionary key;
+	unsigned int *content;
+	unsigned int destId;
+
+	if (data->currentlyViewing == video)
+		data->currentlyViewing = NULL;
+
+	getIdObject(video, idVideo);
+	key = dv->keyGenesis(idVideo);
+	dv->remove(dv,key);
+
+	key = dc->keyGenesis(idVideo);
+	content = (unsigned int*)dc->remove(dc,key);
+
+	if (content == NULL)
+		return -1;
+
+	destId = *content;
+
+	channel->closeDL(channel, destId);
+
+	free(content);
+
+	return destId;
+}
+
+static void closeULVideoChannelPeer(TPeer * peer, unsigned int destId){
+	TDataPeer *data = peer->data;
+	TChannel *channel = data->channel;
+	TDictionary *d = data->videosSending;
+	TIdObject idVideo;
+	unsigned int *content;
+
+	content = (unsigned int*)d->remove(d,destId);
+	free(content);
+
+	channel->closeUL(channel, destId);
+}
+
+static TDictionary *getOpenULVideoChannelsPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->videosSending;
+}
+
+static TDictionary *getOpenDLVideoChannelsPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->channelsReceiving;
+}
+
+static TDictionary *getOpenDLVideosPeer(TPeer *peer){
+	TDataPeer *data = peer->data;
+
+	return data->videosReceiving;
+}
+
+static TObject* getVideoReceivingFromPeer(TPeer *peer, int serverId){
+	TDataPeer *data = peer->data;
+	TDictionary *dc = data->channelsReceiving;
+	TDictionary *dv = data->videosReceiving;
+	TKeyDictionary key;
+	TIterator *i = createKeyIteratorDictionary(dc);
+	unsigned int *serverCandidate;
+
+	i->reset(i);
+
+	while (i->has(i)) {
+		key = (TKeyDictionary)i->current(i);
+
+		serverCandidate = dc->retrieval(dc, key);
+
+		if (*serverCandidate == serverId) {
+			return dv->retrieval(dv, key);
+		}
+
+		i->next(i);
+	}
+
+	return NULL;
+}
+
+static short hasDownlinkPeer(TPeer* peer, TObject *video,  float prefetchFraction){
+	TDataPeer *data = peer->data;
+	TChannel *channel = data->channel;
+	float bitRate = getBitRateObject(video) * (1.f + prefetchFraction);
+
+	return channel->hasDownlink(channel, bitRate);
+}
+
 static short hasCachedPeer(TPeer* peer, void *object){
 	TDataPeer *data = peer->data;
 	TCache *cache = data->cache;
 
 	return cache->has(cache,object);
 	//return (data->status == DOWN_PEER);
+}
+
+static short canStreamPeer(TPeer* peer, void *object, unsigned int clientId, float prefetchFraction){
+	TDataPeer *data = peer->data;
+	TCache *cache = data->cache;
+	TChannel *channel = data->channel;
+	TDictionary *videosSending = data->videosSending;
+	float bitRate;
+	unsigned int *content;
+
+	// Verificar se tem no cache
+	if (!peer->hasCached(peer, object))
+		return 0;
+
+	//Verificar se cliente já está conectado
+	//a esse servidor
+	content = videosSending->retrieval(videosSending, clientId);
+
+	if(content)
+		return 0;
+
+	fprintf(stderr, "Bit rate1: %f\n", getBitRateObject(object));
+	fprintf(stderr, "Prefetch fraction: %f\n", prefetchFraction);
+	// Obter a taxa necessária do vídeo
+	bitRate = getBitRateObject(object) * (1.f + prefetchFraction);
+	fprintf(stderr, "Bit rate2: %f\n", bitRate);
+	fprintf(stderr, "Can stream: %d\n", channel->canStream(channel, bitRate));
+		
+	// 3o) Chamar channel->canStream com essa taxa
+	// para verificar se tem taxa de uplink disponívels
+	return channel->canStream(channel, bitRate);
 }
 
 static void* getProfilePeer(TPeer* peer){
@@ -582,18 +794,75 @@ static void showMapQueryPeer(TPeer* peer){
 	it->reset(it);
 	while(it->has(it)){
 		TMapQuery *map = it->current(it);
-		printf("%d ",data->id);showMapQuery(map);
+		printf("p:\t%d\t",data->id);showMapQuery(map);
 		it->next(it);
 	}
 
 	it->ufree(it);
 }
 
+static void showChannelsInfoPeer(TPeer* peer){
+	unsigned int peerId;
+	TDataPeer *data = peer->data;
+	TObject * currentlyViewing = peer->getCurrentlyViewing(peer);
+	TIdObject idVideo;
 
-TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topo ){
+	TKeyDictionary key;
+	TDictionary* channelsReceiving = peer->getOpenDLVideoChannels(peer);
+	unsigned int* clientId;
+	unsigned int* serverId;
+	TDictionary* videosSending = peer->getOpenULVideoChannels(peer);
+	TIterator *iterator;
+
+	float bitRate;
+
+	peerId = peer->getId(peer);
+
+	if(currentlyViewing != NULL) {
+		getIdObject(currentlyViewing, idVideo);
+		bitRate = getBitRateObject(currentlyViewing);
+
+		key = channelsReceiving->keyGenesis(idVideo);
+		serverId = channelsReceiving->retrieval(channelsReceiving, key);
+
+		if (serverId != NULL)
+			printf("Peer %d is viewing %s (%f Kbps) from %d\n", peerId, idVideo, bitRate, *serverId);
+		else
+			printf("Peer %d is viewing %s (%f Kbps) from cache or CDN\n", peerId, idVideo, bitRate);
+	}
+
+	iterator = createIteratorDictionary(videosSending);
+	iterator->reset(iterator);
+
+	if (iterator->has(iterator)) {
+		printf("Peer %d is sending (total of %f Kbps) to\n", peerId, data->channel->getULRate(data->channel));
+
+		for (; iterator->has(iterator); iterator->next(iterator)) {
+			clientId = (unsigned int*)iterator->current(iterator);
+			if (clientId != NULL)
+				printf("\t%d\n", *clientId);
+		}
+	}
+
+	iterator = createIteratorDictionary(channelsReceiving);
+	iterator->reset(iterator);
+
+	if (iterator->has(iterator)) {
+		printf("Peer %d is receiving (total of %f Kbps) from\n", peerId, data->channel->getDLRate(data->channel));
+
+		for (; iterator->has(iterator); iterator->next(iterator)) {
+			serverId = (unsigned int*)iterator->current(iterator);
+			if (serverId != NULL)
+				printf("\t%d\n", *serverId);
+		}
+	}
+}
+
+TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamicLeave, void *dynamicRequest, void *dataSource, void *replicate, void *cache, void *topo, void *channel){
     TPeer *p = (TPeer*)malloc(sizeof(TPeer));
 
-    p->data = initDataPeer(id, tier, dynamicJoin, dynamicLeave, dynamicRequest, dataSource, replicate, cache, topo );
+    //Canal
+    p->data = initDataPeer(id, tier, dynamicJoin, dynamicLeave, dynamicRequest, dataSource, replicate, cache, topo, channel);
 
     p->getOnStats = getOnStatsPeer;
     p->getId = getIdPeer;
@@ -608,16 +877,28 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
     p->getCache = getCachePeer;
     p->getReplicate = getReplicatePeer;
     p->getDataSource = getDataSourcePeer;
+    p->getCurrentlyViewing = getCurrentlyViewingPeer;
     p->setStatus = setStatusPeer;
     p->setDynamicJoin = setDynamicJoinPeer;
     p->setDynamicLeave = setDynamicLeavePeer;
     p->setDynamicRequest = setDynamicRequestPeer;
     p->setCache = setCachePeer;
     p->setDataSource = setDataSourcePeer;
+    p->setCurrentlyViewing = setCurrentlyViewingPeer;
     p->isUp = isUpPeer;
     p->isDown = isDownPeer;
     p->setupJoining = setupJoiningPeer;
     p->hasCached = hasCachedPeer;
+    p->hasDownlink = hasDownlinkPeer;
+
+    p->openULVideoChannel = openULVideoChannelPeer;
+    p->openDLVideoChannel = openDLVideoChannelPeer;
+    p->closeULVideoChannel = closeULVideoChannelPeer;
+    p->closeDLVideoChannel = closeDLVideoChannelPeer;
+    p->getOpenULVideoChannels = getOpenULVideoChannelsPeer;
+    p->getOpenDLVideoChannels = getOpenDLVideoChannelsPeer;
+    p->getOpenDLVideos = getOpenDLVideosPeer;
+    p->getVideoReceivingFrom = getVideoReceivingFromPeer;
 
     p->insertCache = insertCachePeer;
     p->updateCache = updateCachePeer;
@@ -626,6 +907,11 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
 
     p->getTopologyManager = getTopologyManagerPeer;
     p->setTopologyManager = setTopologyManagerPeer;
+
+    //Canal
+    p->getChannel = getChannelPeer;
+    p->setChannel = setChannelPeer;
+    p->canStream = canStreamPeer;
 
     p->setTier = setTierPeer;
     p->getTier = getTierPeer;
@@ -638,6 +924,7 @@ TPeer* createPeer(unsigned int id,  short tier, void *dynamicJoin, void *dynamic
     p->updateHitsMapQuery = updateHitsMapQueryPeer;
     p->updateRequestsMapQuery = updateRequestsMapQueryPeer;
     p->showMapQuery = showMapQueryPeer;
+    p->showChannelsInfo = showChannelsInfoPeer;
 
     return p;
 }

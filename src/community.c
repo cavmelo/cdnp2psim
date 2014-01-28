@@ -27,6 +27,7 @@
 
 #include "xmlparserconfig.h"
 
+#include "channel.h"
 #include "community.h"
 
 typedef struct _tier TTier;
@@ -145,6 +146,22 @@ static void setupContentPeerCommunity(int id, TPeer *peer, xmlDocPtr doc, TSymTa
 	peer->setDynamicRequest(peer,requestContent);
 	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
 
+	sprintf(xpath,"/community/tier[%d]/peer/content/datasource/prefetch/parameter[@name=\"dynamic\"]",id+1);
+	xdynamic = xgetOneParameter(doc, xpath);
+
+	randSymTable->getPars(randSymTable,xdynamic,pars);
+	entry[0]='\0';
+	parameter = strtok_r(pars, PARAMETERS_SEPARATOR, &last);
+	while(parameter){
+		sprintf(xpath,"/community/tier[%d]/peer/content/datasource/prefetch/parameter[@name=\"%s\"]",id+1,parameter);
+		value = xgetOneParameter(doc,xpath);
+		sprintf(entry+strlen(entry),"%s;",value); free(value);
+		parameter = strtok_r(NULL, PARAMETERS_SEPARATOR, &last);
+	}
+
+	TPrefetch *prefetch = (TPrefetch*)randSymTable->caller(randSymTable,xdynamic,entry);//
+	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
+
 	sprintf(xpath,"/community/tier[%d]/peer/content/datasource/access/parameter[@name=\"dynamic\"]",id+1);
 	xdynamic = xgetOneParameter(doc, xpath);
 
@@ -185,6 +202,7 @@ static void setupContentPeerCommunity(int id, TPeer *peer, xmlDocPtr doc, TSymTa
 	xdynamic = xgetOneParameter(doc, xpath);
 
 	dataSource = DSsymTable->caller(DSsymTable,xdynamic,dataCatalog);
+	dataSource->prefetch = prefetch;
 
 	peer->setDataSource(peer,dataSource);
 
@@ -321,6 +339,32 @@ static void* setupSearchingCommunity(int id, xmlDocPtr doc, TSymTable *searching
 	free(xdynamic); // free the dynamic memory allocated by xgetOnParameter
 
 	return searching;
+}
+
+//Setup Canal
+static void setupChannelPeerCommunity(int id, TPeer *peer, xmlDocPtr doc){
+	char xpath[1000]={[0]='\0'};
+	char *xCapacity=NULL, *xRateUplink=NULL, *xPrefetchDownlinkRatePercent=NULL;
+	char pars[1000]={[0]='\0'}, *parameter=NULL, *value=NULL;
+	char entry[1000]={[0]='\0'};
+	char *separator = ";";
+	char *last=NULL;
+	float capacity;
+	float rateUplink;
+	TChannel *channel;
+
+	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"capacity\"]",id+1);
+	xCapacity = xgetOneParameter(doc, xpath);
+	capacity = atof((char*)xCapacity);
+	free(xCapacity);
+	//
+	sprintf(xpath,"/community/tier[%d]/peer/channel/parameter[@name=\"rateUplink\"]",id+1);
+	xRateUplink = xgetOneParameter(doc, xpath);
+	rateUplink = atof((char*)xRateUplink);
+	free(xRateUplink);
+
+	channel = createDataChannel(capacity, rateUplink);
+	peer->setChannel(peer,channel);
 }
 
 
@@ -743,14 +787,14 @@ static int getNumberOfAlivePeerCommunity(TCommunity *community){
 	return alive->getOccupancy(alive);
 }
 
-static void* searchingCommunity(TCommunity *community, void *vpeer, void *object){
+static void* searchingCommunity(TCommunity *community, void *vpeer, void *object, unsigned int clientId, float prefetchRate){
 	TDataCommunity *data = community->data;
 	TPeer *peer = vpeer;
 	int tierPeer = peer->getTier(peer);
 
 	TSearch *search = data->tiers->tier[tierPeer-1].searching;
 
-	return search->run(search,peer,object);
+	return search->run(search,peer,object,clientId, prefetchRate);
 
 }
 
@@ -806,8 +850,8 @@ TCommunity* createCommunity(int simTime, char *scenarios){
 		dataComm->tiers->tier[i].searching = setupSearchingCommunity(i, doc, symTable);
 
 		for(j=0;j<xSize;j++){
-
-			p = createPeer((unsigned int)k, i+1, NULL, NULL, NULL, NULL, NULL, NULL, NULL );
+			//Canal
+			p = createPeer((unsigned int)k, i+1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL );
 
 			// setup
 			setupChurnPeerCommunity(i, p, doc, symTable);
@@ -815,6 +859,8 @@ TCommunity* createCommunity(int simTime, char *scenarios){
 			setupCachePeerCommunity(i, p, doc, symTable);
 			setupTopologyManagerPeerCommunity(i, p, doc, symTable);
 			setupProfilePeerCommunity(i, p, doc, symTable);
+			//Canal
+			setupChannelPeerCommunity(i, p, doc);
 
 			dataComm->peers[k] = p;
 			k++;

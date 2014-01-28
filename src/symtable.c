@@ -88,12 +88,12 @@ static void* initDataSourceSymTable(TDictionary* d){
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("DATASOURCE:COLLECTION");
-	sym->create= createFromCollectionDataSource;
+	sym->create= (TCreateSymTable)createFromCollectionDataSource;
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("DATASOURCE:PLAYLIST");
-	sym->create= createFromPlaylistDataSource;
+	sym->create= (TCreateSymTable)createFromPlaylistDataSource;
 	d->insert(d,key,sym);
 
 	return d;
@@ -106,25 +106,25 @@ static void* initDataCatalogSymTable(TDictionary* d){
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("DATACATALOG:FROMCOLLECTIONSINGLETON");
-	sym->create= createFromCollectionSingletonDataCatalog;
+	sym->create= (TCreateSymTable)createFromCollectionSingletonDataCatalog;
 	sprintf(sym->pars,"collection;length");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("DATACATALOG:FROMCOLLECTION");
-	sym->create= createFromCollectionDataCatalog;
+	sym->create= (TCreateSymTable)createFromCollectionDataCatalog;
 	sprintf(sym->pars,"collection;length");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("DATACATALOG:FROMPLAYLIST");
-	sym->create= createFromPlaylistDataCatalog;
+	sym->create= (TCreateSymTable)createFromPlaylistDataCatalog;
 	sprintf(sym->pars,"setlist;length;collection");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("DATACATALOG:FROMPLAYLISTSINGLETON");
-	sym->create= createFromPlaylistSingletonDataCatalog;
+	sym->create= (TCreateSymTable)createFromPlaylistSingletonDataCatalog;
 	sprintf(sym->pars,"setlist;length;collection");
 	d->insert(d,key,sym);
 
@@ -140,116 +140,137 @@ static void* initRandomicSymTable(TDictionary *d){
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:TRUNCATEDGEOMETRIC");
-	sym->create= createTruncatedGeometricRandomic;
+	sym->create= (TCreateSymTable)createTruncatedGeometricRandomic;
 	sprintf(sym->pars,"alpha;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:TRUNCATEDGEOMETRICSINGLETON");
-	sym->create= createSingletonTruncatedGeometricRandomic;
+	sym->create= (TCreateSymTable)createSingletonTruncatedGeometricRandomic;
 	sprintf(sym->pars,"alpha;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:PARETO");
-	sym->create= createParetoRandomic;
+	sym->create= (TCreateSymTable)createParetoRandomic;
 	sprintf(sym->pars,"alpha;mean;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:PARETOSINGLETON");
-	sym->create= createSingletonParetoRandomic;
+	sym->create= (TCreateSymTable)createSingletonParetoRandomic;
 	sprintf(sym->pars,"alpha;mean;");
 	d->insert(d,key,sym);
 
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:EXPONENTIAL");
-	sym->create= createExponentialRandomic;
+	sym->create= (TCreateSymTable)createExponentialRandomic;
 	sprintf(sym->pars,"mean;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:EXPONENTIALSINGLETON");
-	sym->create= createSingletonExponentialRandomic;
+	sym->create= (TCreateSymTable)createSingletonExponentialRandomic;
 	sprintf(sym->pars,"mean;");
 	d->insert(d,key,sym);
 
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:LOGNORMAL");
-	sym->create=createLognormalRandomic;
+	sym->create=(TCreateSymTable)createLognormalRandomic;
 	sprintf(sym->pars,"mean;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:LOGNORMALSINGLETON");
-	sym->create=createSingletonLognormalRandomic;
+	sym->create=(TCreateSymTable)createSingletonLognormalRandomic;
 	sprintf(sym->pars,"mean;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:CONSTANT");
-	sym->create = createConstantRandomic;
+	sym->create = (TCreateSymTable)createConstantRandomic;
 	sprintf(sym->pars,"value;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:CONSTANTSINGLETON");
-	sym->create = createSingletonConstantRandomic;
+	sym->create = (TCreateSymTable)createSingletonConstantRandomic;
 	sprintf(sym->pars,"value;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:ZIPF");
-	sym->create = createZipfRandomic;
+	sym->create = (TCreateSymTable)createZipfRandomic;
 	sprintf(sym->pars,"alpha;range;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:ZIPFSINGLETON");
-	sym->create = createSingletonZipfRandomic;
+	sym->create = (TCreateSymTable)createSingletonZipfRandomic;
 	sprintf(sym->pars,"alpha;range;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:POISSON");
-	sym->create = createPoissonRandomic;
+	sym->create = (TCreateSymTable)createPoissonRandomic;
 	sprintf(sym->pars,"mean;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:POISSONSINGLETON");
-	sym->create = createSingletonPoissonRandomic;
+	sym->create = (TCreateSymTable)createSingletonPoissonRandomic;
 	sprintf(sym->pars,"mean;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:UNIFORM");
-	sym->create = createUniformRandomic;
+	sym->create = (TCreateSymTable)createUniformRandomic;
 	sprintf(sym->pars,"range;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:UNIFORMSINGLETON");
-	sym->create = createSingletonUniformRandomic;
+	sym->create = (TCreateSymTable)createSingletonUniformRandomic;
 	sprintf(sym->pars,"range;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:FROMFILE");
-	sym->create = createFromFileRandomic;
+	sym->create = (TCreateSymTable)createFromFileRandomic;
 	sprintf(sym->pars,"source;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("RANDOM:FROMFILESINGLETON");
-	sym->create = createSingletonFromFileRandomic;
+	sym->create = (TCreateSymTable)createSingletonFromFileRandomic;
 	sprintf(sym->pars,"source;");
 	d->insert(d,key, sym);
 
 	return d;
 }
+
+
+static void* initPrefetchSymTable(TDictionary *d){
+	TKeyDictionary key;
+	TDataCreateSymTable *sym;
+
+	sym = malloc(sizeof(TDataCreateSymTable));
+	key = d->keyGenesis("PREFETCH:NONE");
+	sym->create= (TCreateSymTable)createPrefetchNone;
+	sprintf(sym->pars,";");
+	d->insert(d,key,sym);
+
+	sym = malloc(sizeof(TDataCreateSymTable));
+	key = d->keyGenesis("PREFETCH:NEXTFROMPLAYLIST");
+	sym->create= (TCreateSymTable)createPrefetchNextFromPlaylist;
+	sprintf(sym->pars,"fraction;");
+	d->insert(d,key,sym);
+
+	return d;
+}
+
 
 
 //
@@ -298,13 +319,13 @@ static void* initSearchingSymTable(TDictionary *d){
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("SEARCH:RANDOMWALK");
-	sym->create = createRandomWalkSearch;
+	sym->create = (TCreateSymTable)createRandomWalkSearch;
 	sprintf(sym->pars,"maxTries;");
 	d->insert(d,key,sym);
 
 	sym = malloc(sizeof(TDataCreateSymTable));
 	key = d->keyGenesis("SEARCH:FLOADING");
-	sym->create = createFloadingSearch;
+	sym->create = (TCreateSymTable)createFloadingSearch;
 	sprintf(sym->pars,"maxLevels;");
 	d->insert(d,key,sym);
 
@@ -395,6 +416,7 @@ TSymTable *createSymTable(){
 	TDictionary* dic = createDictionary();
 
 	initDataCatalogSymTable(dic);
+	initPrefetchSymTable(dic);
 	initDataSourceSymTable(dic);
 	initTopologyManagerSymTable(dic);
 	initSessionLastingPolicySymTable(dic);

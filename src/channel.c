@@ -1,12 +1,15 @@
 /*
- * channeal.c
+ * channel.c
  *
  *  Created on: 07/09/2013
  *      Author: cesar
  */
 #include "stdlib.h"
+#include "stdio.h"
 #include "dictionary.h"
 #include "internals.h"
+
+#include "channel.h"
 
 typedef struct socket_data_channel{
 	int idPeerSrc;
@@ -39,6 +42,8 @@ TOngoingDataChannel *createOngoingDataChannel(float rate, int idPeerSrc, int idP
 
 typedef struct _data_channel{
 	float capacity; // Mbps
+	float max_uplink;
+	float max_downlink;
 	float rate_uplink; // Mbps
 	float rate_downlink; // Mbps
 	TDictionary *ongoingUL; // opened data channel on UPLink
@@ -46,38 +51,49 @@ typedef struct _data_channel{
 
 } TDataChannel;
 
-typedef struct channel TChannel;
-
-typedef  short (* TOpenDLDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
-typedef  short (* TOpenULDataChannel )(TChannel *, int idPeerSrc, int idPeerDst, float rate);
-typedef  void (* TCloseDLDataChannel )(TChannel *, unsigned int idPeerDst);
-typedef  void (* TCloseULDataChannel )(TChannel *, unsigned int idPeerSrc);
-
-struct channel{
-	void *data;
-	TOpenDLDataChannel openDL; // open a DownLink data Channel
-	TOpenULDataChannel openUL;
-	TCloseDLDataChannel closeDL; // close a DownLink data Channel
-	TCloseULDataChannel closeUL;
-};
-
 
 static TDataChannel *initDataChannel(float capacity, float rate_uplink){
 	TDataChannel *data = malloc(sizeof(TDataChannel));
 
 	data->capacity =capacity;
+	data->max_uplink = rate_uplink;
+	data->max_downlink = capacity - rate_uplink;
 	data->rate_uplink = rate_uplink;
-	data->rate_downlink = capacity - rate_uplink;
+	data->rate_downlink = data->max_downlink;
 	data->ongoingUL = createDictionary();
 	data->ongoingDL = createDictionary();
 	return data;
 }
 
-bandwidthBroker(){
+/*bandwidthBroker(){
 
-}
+}*/
 
 enum {UPLINK = 1, DOWNLINK=2, UNDEFINED=3};
+
+static short canStreamDataChannel(TChannel *channel, float rate){
+	TDataChannel *data = channel->data;
+
+	return data->rate_uplink > rate ? 1 : 0;
+}
+
+static float getULRateChannel(TChannel *channel){
+	TDataChannel *data = channel->data;
+
+	return data->max_uplink - data->rate_uplink;
+}
+
+static float getDLRateChannel(TChannel *channel){
+	TDataChannel *data = channel->data;
+
+	return data->max_downlink - data->rate_downlink;
+}
+
+static short hasDownlinkChannel(TChannel *channel, float bitRate) {
+	TDataChannel *data = channel->data;
+
+	return data->rate_downlink >= bitRate ? 1 : 0;
+}
 
 static void closeDLDataChannel(TChannel *channel, unsigned int idPeerDst){
 	TOngoingDataChannel *ongoingDC;
@@ -91,11 +107,11 @@ static void closeDLDataChannel(TChannel *channel, unsigned int idPeerDst){
 }
 
 
-static void closeULDataChannel(TChannel *channel, unsigned int idPeerSrc){
+static void closeULDataChannel(TChannel *channel, unsigned int idPeerDst){
 	TOngoingDataChannel *ongoingDC;
 	TDataChannel *data = channel->data;
 
-	ongoingDC = data->ongoingUL->remove(data->ongoingUL,idPeerSrc);
+	ongoingDC = data->ongoingUL->remove(data->ongoingUL,idPeerDst);
 	data->rate_uplink += ongoingDC->eb;
 
 	free(ongoingDC);
@@ -107,9 +123,13 @@ static short openULDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, 
 
 	if (data->rate_uplink >= eb){
 		TOngoingDataChannel *ongDC = createOngoingDataChannel(eb, idPeerSrc, idPeerDst);
-		data->ongoingUL->insert(data->ongoingUL, idPeerSrc, ongDC);
+		data->ongoingUL->insert(data->ongoingUL, idPeerDst, ongDC);
 		data->rate_uplink -= eb;
 		opened = 1; // true
+	}else{
+		printf("Failed to open UL channel!\n");
+		printf("eb: %f, rate_uplink: %f\n", eb, data->rate_uplink);
+		fflush(stdout);
 	}
 
 	return opened;
@@ -125,7 +145,12 @@ static short openDLDataChannel(TChannel *channel, int idPeerSrc, int idPeerDst, 
 		data->ongoingDL->insert(data->ongoingDL, idPeerDst, ongoingDC);
 		data->rate_downlink -= eb;
 		opened = 1; // true
+	}else{
+		printf("Failed to open DL channel!\n");
+		printf("eb: %f, rate_downlink: %f\n", eb, data->rate_downlink);
+		fflush(stdout);
 	}
+
 	return opened;
 }
 
@@ -136,18 +161,21 @@ TChannel *createDataChannel(float capacity, float rate_upload){
 
 	channel->data = initDataChannel(capacity, rate_upload);
 
+	channel->canStream = canStreamDataChannel;
+	channel->getULRate = getULRateChannel;
+	channel->getDLRate = getDLRateChannel;
 	channel->closeDL = closeDLDataChannel;
 	channel->openDL = openDLDataChannel;
 	channel->closeUL = closeULDataChannel;
 	channel->openUL = openULDataChannel;
-
+	channel->hasDownlink = hasDownlinkChannel;
 
 	return channel;
 }
 
-void destroyDataChannel(TChannel *channel){
+/*void destroyDataChannel(TChannel *channel){
 
 	//TDataChannel *data = channel->data;
 
 
-}
+}*/
